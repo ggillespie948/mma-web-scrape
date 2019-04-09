@@ -1,4 +1,6 @@
 ﻿using HtmlAgilityPack;
+using RacingWebScrape.Models;
+using RacingWebScrape.Models.Courses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +15,10 @@ namespace RacingWebScrape
         // Processed content
         private static List<string> DailyMeetingTitles {get; set;}
 
-
-
         //Raw html node collections, unprocessed
         private static HtmlNodeCollection DailyMeetingTitleNodes {get; set;}
-        private static List<HtmlNode> DailyMeetingContentNodes {get; set;}
 
+        private static List<HtmlNode> DailyMeetingContentNodes {get; set;}
 
         static void Main(string[] args)
         {
@@ -42,8 +42,84 @@ namespace RacingWebScrape
             PrintDailyMeetingTitles();
             PrintDailyResults();
 
+            ProcessDailyMeetingContentNodes();
+
             Console.WriteLine("Daily Meeting content nodes: " + DailyMeetingContentNodes.Count);
             Console.ReadLine();
+        }
+
+        private static void ProcessDailyMeetingContentNodes()
+        {
+            var nodeCount = 0;
+            foreach(HtmlNode node in DailyMeetingContentNodes)
+            {
+
+
+                var course = new Course();
+                course.Name = DailyMeetingTitles[nodeCount];
+
+                Console.WriteLine("");
+                Console.WriteLine("///////////////");
+                Console.WriteLine(course.Name);
+                Console.WriteLine("///////////////");
+                //Console.WriteLine("Children divs: " + node.Descendants("div").ToList().Count());
+
+                if(!CourseNameIsRegistered())
+                {
+                    //Register new course into system
+                }
+
+                if(node.Descendants("div").Any())
+                {
+                    foreach(var meetingResult in node.Descendants("div").ToList())
+                    {
+                        var newMeetingResult = new MeetingResult();
+
+                        //Collect Content Nodes
+                        var titleNode = meetingResult.Descendants("a").FirstOrDefault();
+                        var raceTimeNode = meetingResult.Descendants("span").FirstOrDefault();
+
+                        if(meetingResult.SelectNodes(".//tr") != null)
+                        {
+
+                            var resultsNodes = meetingResult.SelectNodes(".//tr").Where(n => n.HasClass("results-place")).ToList();
+                            Console.WriteLine(" ");
+                            Console.WriteLine(titleNode.InnerHtml.ToString());
+                            Console.WriteLine("Time: " + raceTimeNode.InnerHtml.ToString());
+
+                            foreach (var horseResultNode in resultsNodes)
+                            {
+                                var newResultsEntry = new ResultEntry();
+
+                                var placeNode = horseResultNode.Descendants("td").FirstOrDefault();
+                                // jockey silks node is 2nd tr node, not extracting picture for obvious reasons
+                                var nameNode = horseResultNode.Descendants("td").Last().FirstChild;
+                                var fractionNode = horseResultNode.Descendants().Where(n => n.HasClass("price-fractional")).FirstOrDefault();
+                                var decimalNode = horseResultNode.Descendants().Where(n => n.HasClass("price-decimal")).FirstOrDefault();
+
+                                //todo: collect the " f" text in the horeResultNode indicatin favourite or not
+
+                                Console.WriteLine(placeNode.InnerHtml + "  " + nameNode.InnerHtml + "  " + fractionNode.InnerHtml);
+                            }
+                        }
+
+                    }
+
+                }
+                
+                Console.WriteLine(" ");
+
+                nodeCount++;
+            }
+            
+        }
+
+        /// <summary>
+        /// This method checks for a course meeting with the same name
+        /// </summary>
+        private static bool CourseNameIsRegistered()
+        {
+            return true;
         }
 
         private static void PrintNodeClasses(HtmlNode node)
@@ -92,7 +168,7 @@ namespace RacingWebScrape
 
         private static void PrintDailyMeetingTitles()
         {
-            Console.WriteLine("There are " + DailyMeetingTitles.Count + " Meetings In The UK Today");
+            Console.WriteLine("There are " + DailyMeetingTitles.Count + " meetings Today");
 
             int counter = 0;
             foreach(var meeting in DailyMeetingTitles)
@@ -102,10 +178,14 @@ namespace RacingWebScrape
             }
         }
 
+        private static void ProcessMeetingContentNode()
+        {
+
+        }
+
         private static void PrintDailyResults()
         {
             
-
         }
 
 

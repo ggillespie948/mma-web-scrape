@@ -12,6 +12,8 @@ namespace RacingWebScrape.Models.Courses
 
         public string Name { get; set; }
 
+        public string RaceTitleContentId { get; set; }
+
         /// <summary>
         /// This is the html element ID used to obtain the results node
         /// </summary>
