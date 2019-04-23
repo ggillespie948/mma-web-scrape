@@ -1,4 +1,5 @@
 ﻿using RacingWebScrape.Interfaces;
+using RacingWebScrape.Interfaces.MeetingResults;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +10,7 @@ namespace RacingWebScrape.UnitOfWork
     public interface IRacingUnitOfWork
     {
         ICourseRepository Courses { get; }
+        ICourseMeetingRepository CourseMeetings {get;}
 
         void Complete();
         Task CompleteAsync();

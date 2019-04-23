@@ -52,7 +52,6 @@ namespace RacingWebScrape
 
                 if (!CourseNameIsRegistered(course.Name))
                 {
-                    //Register new course into system
                     UnitOfWork.Courses.Add(course);
                     UnitOfWork.Complete();
                 } else
@@ -66,6 +65,12 @@ namespace RacingWebScrape
                     newCourseMeeting.Course = course;
                     newCourseMeeting.MeetingDate = DateTime.Today;
                     newCourseMeeting.MeetingResults = new List<MeetingResult>();
+
+                    if(!UnitOfWork.CourseMeetings.DoesCourseMeetingExist(newCourseMeeting))
+                    {
+                        UnitOfWork.CourseMeetings.Add(newCourseMeeting);
+                        UnitOfWork.Complete();
+                    }
 
                     foreach (var meetingResult in node.Descendants("div").ToList())
                     {

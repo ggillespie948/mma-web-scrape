@@ -4,7 +4,9 @@ using System.Text;
 using System.Threading.Tasks;
 using RacingWebScrape.Db;
 using RacingWebScrape.Interfaces;
+using RacingWebScrape.Interfaces.MeetingResults;
 using RacingWebScrape.Repositories;
+using RacingWebScrape.Repositories.MeetingResults;
 
 namespace RacingWebScrape.UnitOfWork
 {
@@ -16,9 +18,11 @@ namespace RacingWebScrape.UnitOfWork
         {
             _context = context;
             Courses = new CourseRepository(context);
+            CourseMeetings = new CourseMeetingRepository(context);
         }
 
         public ICourseRepository Courses {get; set;}
+        public ICourseMeetingRepository CourseMeetings { get; set; }
 
         public void Complete()
         {
