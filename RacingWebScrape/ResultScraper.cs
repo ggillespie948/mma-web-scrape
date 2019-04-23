@@ -12,6 +12,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using RacingWebScrape.UnitOfWork;
 
 namespace RacingWebScrape
 {
@@ -20,13 +21,11 @@ namespace RacingWebScrape
     /// </summary>
     public class ResultScraper
     {
-        private readonly RacingDbContext _context;
-
-        public ResultScraper(RacingDbContext Context)
+        public IRacingUnitOfWork UnitOfWork;
+        public ResultScraper(IRacingUnitOfWork unitOfWork)
         {
-            _context = Context;
+            UnitOfWork = unitOfWork;
         }
-
         private static List<string> DailyMeetingTitles { get; set; }
         //Raw html node collections, unprocessed
         private static HtmlNodeCollection DailyMeetingTitleNodes { get; set; }
@@ -38,7 +37,6 @@ namespace RacingWebScrape
             DailyMeetingTitleNodes = pageDocument.DocumentNode.SelectNodes("(//div[contains(@class,'w-results-holder')][1]//a)");
             RetrieveDailyMeetingContentNodes(ref pageDocument);
             ProcessDailyMeetingContentNodes();
-
 
             PrintDailyMeetingTitles();
             PrintDailyResults();
@@ -59,8 +57,8 @@ namespace RacingWebScrape
                 if (!CourseNameIsRegistered())
                 {
                     //Register new course into system
-                    _context.Courses.Add(course);
-                    _context.SaveChanges();
+                    UnitOfWork.Courses.Add(course);
+                    UnitOfWork.Complete();
                 }
 
                 if (node.Descendants("div").Any())
