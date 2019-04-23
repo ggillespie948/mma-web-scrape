@@ -31,7 +31,7 @@ namespace RacingWebScrape
 
             
 
-            Console.WriteLine("Daily Meeting content nodes: " + DailyMeetingContentNodes.Count);
+            //Console.WriteLine("Daily Meeting content nodes: " + DailyMeetingContentNodes.Count);
             Console.ReadLine();
         }
 

@@ -1,39 +1,46 @@
-﻿using RacingWebScrape.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using RacingWebScrape.Db;
+using RacingWebScrape.Interfaces;
 using RacingWebScrape.Models.Courses;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RacingWebScrape.Repositories
 {
     public class CourseRepository : ICourseRepository
     {
-        public CourseRepository()
+        private readonly RacingDbContext _context;
+        public CourseRepository(RacingDbContext context)
         {
+            _context = context;
         }
 
         public void Add(Course course)
         {
-            throw new NotImplementedException();
+            _context.Courses.Add(course);
         }
 
         public void Delete(Course course)
         {
-            throw new NotImplementedException();
+            _context.Entry(course).State = EntityState.Deleted;
         }
 
         public Course Get(int id)
         {
-            throw new NotImplementedException();
+            return _context.Courses
+                .Where(i => i.Id == id)
+                .FirstOrDefault();
         }
 
         public IEnumerable<Course> Get()
         {
-            throw new NotImplementedException();
+            return _context.Courses.ToList();
         }
 
         public void Update(Course course)
         {
-            throw new NotImplementedException();
+            _context.Entry(course).State = EntityState.Modified;
         }
     }
 }
