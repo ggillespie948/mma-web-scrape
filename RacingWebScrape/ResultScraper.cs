@@ -21,7 +21,7 @@ namespace RacingWebScrape
     /// </summary>
     public class ResultScraper
     {
-        public IRacingUnitOfWork UnitOfWork;
+        public static IRacingUnitOfWork UnitOfWork;
         public ResultScraper(IRacingUnitOfWork unitOfWork)
         {
             UnitOfWork = unitOfWork;
@@ -54,7 +54,7 @@ namespace RacingWebScrape
                 //Console.WriteLine(course.Name);
                 //Console.WriteLine("///////////////");
 
-                if (!CourseNameIsRegistered())
+                if (!CourseNameIsRegistered(course.Name))
                 {
                     //Register new course into system
                     UnitOfWork.Courses.Add(course);
@@ -141,9 +141,15 @@ namespace RacingWebScrape
         /// <summary>
         /// This method checks for a course meeting with the same name
         /// </summary>
-        private static bool CourseNameIsRegistered()
+        private static bool CourseNameIsRegistered(string name)
         {
-            return true;
+            if(UnitOfWork.Courses.Get().Where(i=>i.Name == name).Any())
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
         }
 
         private static void PrintNodeClasses(HtmlNode node)

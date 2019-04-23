@@ -16,8 +16,7 @@ namespace RacingWebScrape.Db
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string cn = @"Server=localhost;Database=RacingData;Trusted_Connection=False;MultipleActiveResultSets=true;";
-            optionsBuilder.UseSqlServer(cn);
+            string cn = @"Server=localhost;Database=RacingData;Trusted_Connection=False;MultipleActiveResultSets=true;User ID=gary;"; //todo: add password
             base.OnConfiguring(optionsBuilder);
         }
     }
