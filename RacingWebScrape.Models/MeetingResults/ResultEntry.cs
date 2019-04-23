@@ -17,6 +17,8 @@ namespace RacingWebScrape.Models
 
         public string HorseName { get; set; }
 
+        public string HorseNumber { get; set; }
+
         public string JockeyName { get; set; }
 
         public string TrainerName { get; set; }

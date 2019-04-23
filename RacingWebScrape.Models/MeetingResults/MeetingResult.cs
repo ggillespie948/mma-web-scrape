@@ -26,5 +26,13 @@ namespace RacingWebScrape.Models
         /// String containing information of number of runners, name of non-runners
         /// </summary>
         public string RunnerInformation { get; set; }
+
+        public string WinningJockey { get; set; }
+
+        public string WinningTrainer { get; set; }
+
+        //Reference to the url where the full result information can be scraped
+        public string FullResultURL { get; set; }
+
     }
 }
