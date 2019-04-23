@@ -29,7 +29,7 @@ namespace RacingWebScrape.Repositories.MeetingResults
 
         public bool DoesCourseMeetingExist(CourseMeeting courseMeeting)
         {
-            if(_context.CourseMeetings.Where(i=>i.MeetingDate == courseMeeting.MeetingDate && i.CourseId == courseMeeting.Id).Any())
+            if(_context.CourseMeetings.Where(i=>i.MeetingDate.Date == courseMeeting.MeetingDate.Date && i.CourseId == courseMeeting.CourseId).Any())
             {
                 return true;
             } else

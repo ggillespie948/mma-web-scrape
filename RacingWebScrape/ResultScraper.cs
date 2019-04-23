@@ -63,6 +63,7 @@ namespace RacingWebScrape
                 {
                     CourseMeeting newCourseMeeting = new CourseMeeting();
                     newCourseMeeting.Course = course;
+                    newCourseMeeting.CourseId = course.Id;
                     newCourseMeeting.MeetingDate = DateTime.Today;
                     newCourseMeeting.MeetingResults = new List<MeetingResult>();
 
