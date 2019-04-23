@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RacingWebScrape.Repositorie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RacingWebScrape.Interfaces", "RacingWebScrape.Interfaces\RacingWebScrape.Interfaces.csproj", "{1625422D-B9DA-4C1F-B56C-17535DEEB8C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RacingWebScrape.UnitOfWork", "RacingWebScrape.UnitOfWork\RacingWebScrape.UnitOfWork.csproj", "{B85036D2-9BCC-482F-8177-1EE7C30ED554}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RacingWebScrape.UnitOfWork", "RacingWebScrape.UnitOfWork\RacingWebScrape.UnitOfWork.csproj", "{B85036D2-9BCC-482F-8177-1EE7C30ED554}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RacingWebScrape.Db", "RacingWebScrape.DbContext\RacingWebScrape.Db.csproj", "{61163D7D-96C2-413A-91B8-8EA0E220AEEE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{B85036D2-9BCC-482F-8177-1EE7C30ED554}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B85036D2-9BCC-482F-8177-1EE7C30ED554}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B85036D2-9BCC-482F-8177-1EE7C30ED554}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61163D7D-96C2-413A-91B8-8EA0E220AEEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61163D7D-96C2-413A-91B8-8EA0E220AEEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61163D7D-96C2-413A-91B8-8EA0E220AEEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61163D7D-96C2-413A-91B8-8EA0E220AEEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

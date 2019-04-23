@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RacingWebScrape.DbContext\RacingWebScrape.Db.csproj" />
     <ProjectReference Include="..\RacingWebScrape.Interfaces\RacingWebScrape.Interfaces.csproj" />
   </ItemGroup>
 

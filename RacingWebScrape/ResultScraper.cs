@@ -106,9 +106,10 @@ namespace RacingWebScrape
                                 var horseName = ProcessHorseNameNode(HttpUtility.HtmlDecode(nameNode?.InnerHtml.ToString()), out var horseNo);
                                 newResultsEntry.HorseName = horseName;
                                 newResultsEntry.HorseNumber = horseNo;
-                                newResultsEntry.Place = placeNode.InnerHtml.ToString();
-                                newResultsEntry.PriceDecimal = decimal.Parse(decimalNode.InnerHtml.ToString());
-                                newResultsEntry.PriceFraction = fractionNode.InnerHtml.ToString();
+                                newResultsEntry.Place = placeNode?.InnerHtml.ToString();
+                                if(decimalNode != null)
+                                    newResultsEntry.PriceDecimal = decimal.Parse(decimalNode?.InnerHtml.ToString());
+                                newResultsEntry.PriceFraction = fractionNode?.InnerHtml.ToString();
                                 newResultsEntry.MeetingResultId = newMeetingResult.Id;
                                 newResultsEntry.MeetingResult = newMeetingResult;
 
@@ -159,7 +160,7 @@ namespace RacingWebScrape
             if (horseTitleHtml.ElementAt(1).ToString() == ".")
             {
                 horseNumber = horseTitleHtml.Substring(0, 2);
-                return horseTitleHtml.Substring(2, 2 - horseTitleHtml.Length);
+                return horseTitleHtml.Substring(2, horseTitleHtml.Length-2);
             }
             else
             {

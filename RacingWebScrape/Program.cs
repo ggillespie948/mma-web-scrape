@@ -25,9 +25,9 @@ namespace RacingWebScrape
         {
             var serviceProvider = new ServiceCollection()
                 .AddLogging()
-                .AddTransient<IRacingUnitOfWork, UnitOfWork.UnitOfWork>();
-
-            serviceProvider.AddDbContext<RacingDbContext>(); //to do add conneciton string
+                .AddDbContext<RacingDbContext>()
+                .AddTransient<IRacingUnitOfWork, UnitOfWork.UnitOfWork>()
+                .BuildServiceProvider();
 
             //Begin Automatic Quick Scrape
             HttpClient client = new HttpClient();
@@ -36,15 +36,10 @@ namespace RacingWebScrape
             HtmlDocument pageDocument = new HtmlDocument();
             pageDocument.LoadHtml(pageContents);
 
-            ResultScraper Scraper = new ResultScraper();
+            ResultScraper Scraper = new ResultScraper(serviceProvider.GetService<IRacingUnitOfWork>());
             Scraper.ScrapeQuickResults(pageDocument);
 
             Console.ReadLine();
         }
-
-        
-
-
-
     }
 }

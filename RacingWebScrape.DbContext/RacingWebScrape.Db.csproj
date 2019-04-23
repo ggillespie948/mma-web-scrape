@@ -1,20 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.4" />
-    <ProjectReference Include="..\RacingWebScrape.DbContext\RacingWebScrape.Db.csproj" />
-    <ProjectReference Include="..\RacingWebScrape.Interfaces\RacingWebScrape.Interfaces.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\RacingWebScrape.Models\RacingWebScrape.Models.csproj" />
-    <ProjectReference Include="..\RacingWebScrape.Repositories\RacingWebScrape.Repositories.csproj" />
-    <ProjectReference Include="..\RacingWebScrape.UnitOfWork\RacingWebScrape.UnitOfWork.csproj" />
   </ItemGroup>
 
 </Project>
