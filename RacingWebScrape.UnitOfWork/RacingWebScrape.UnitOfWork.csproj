@@ -7,7 +7,6 @@
   <ItemGroup>
     <ProjectReference Include="..\RacingWebScrape.Interfaces\RacingWebScrape.Interfaces.csproj" />
     <ProjectReference Include="..\RacingWebScrape.Repositories\RacingWebScrape.Repositories.csproj" />
-    <ProjectReference Include="..\RacingWebScrape\RacingWebScrape.csproj" />
   </ItemGroup>
 
 </Project>
