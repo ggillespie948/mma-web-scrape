@@ -12,6 +12,7 @@ namespace RacingWebScrape.Interfaces
         void Delete(Course course);
 
         Course Get(int id);
+        Course GetByName(string name);
         IEnumerable<Course> Get();
     }
 }

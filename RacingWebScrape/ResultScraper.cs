@@ -50,20 +50,22 @@ namespace RacingWebScrape
                 var course = new Course();
                 course.Name = DailyMeetingTitles[nodeCount];
 
-                //Console.WriteLine("");
-                //Console.WriteLine(course.Name);
-                //Console.WriteLine("///////////////");
-
                 if (!CourseNameIsRegistered(course.Name))
                 {
                     //Register new course into system
                     UnitOfWork.Courses.Add(course);
                     UnitOfWork.Complete();
+                } else
+                {
+                    course = UnitOfWork.Courses.GetByName(course.Name);
                 }
 
                 if (node.Descendants("div").Any())
                 {
                     CourseMeeting newCourseMeeting = new CourseMeeting();
+                    newCourseMeeting.Course = course;
+                    newCourseMeeting.MeetingDate = DateTime.Today;
+                    newCourseMeeting.MeetingResults = new List<MeetingResult>();
 
                     foreach (var meetingResult in node.Descendants("div").ToList())
                     {

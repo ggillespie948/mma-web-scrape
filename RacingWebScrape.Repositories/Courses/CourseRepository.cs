@@ -38,6 +38,11 @@ namespace RacingWebScrape.Repositories
             return _context.Courses.ToList();
         }
 
+        public Course GetByName(string name)
+        {
+            return _context.Courses.Where(i => i.Name == name).FirstOrDefault();
+        }
+
         public void Update(Course course)
         {
             _context.Entry(course).State = EntityState.Modified;
