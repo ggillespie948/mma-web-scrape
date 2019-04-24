@@ -10,7 +10,7 @@ namespace RacingWebScrape.UnitOfWork
     public interface IRacingUnitOfWork
     {
         ICourseRepository Courses { get; }
-        ICourseMeetingRepository CourseMeetings {get;}
+        IMeetingResultsRepository CourseMeetings {get;}
 
         void Complete();
         Task CompleteAsync();

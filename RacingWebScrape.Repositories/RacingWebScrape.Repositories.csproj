@@ -9,4 +9,8 @@
     <ProjectReference Include="..\RacingWebScrape.Interfaces\RacingWebScrape.Interfaces.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Horses\" />
+  </ItemGroup>
+
 </Project>

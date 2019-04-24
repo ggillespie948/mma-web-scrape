@@ -69,7 +69,7 @@ namespace RacingWebScrape
 
                     if(!UnitOfWork.CourseMeetings.DoesCourseMeetingExist(newCourseMeeting))
                     {
-                        UnitOfWork.CourseMeetings.Add(newCourseMeeting);
+                        UnitOfWork.CourseMeetings.AddMeeting(newCourseMeeting);
                         UnitOfWork.Complete();
                     }
 

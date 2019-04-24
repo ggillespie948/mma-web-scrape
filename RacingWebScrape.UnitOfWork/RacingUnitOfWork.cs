@@ -18,11 +18,11 @@ namespace RacingWebScrape.UnitOfWork
         {
             _context = context;
             Courses = new CourseRepository(context);
-            CourseMeetings = new CourseMeetingRepository(context);
+            CourseMeetings = new MeetingResultsRepository(context);
         }
 
         public ICourseRepository Courses {get; set;}
-        public ICourseMeetingRepository CourseMeetings { get; set; }
+        public IMeetingResultsRepository CourseMeetings { get; set; }
 
         public void Complete()
         {
