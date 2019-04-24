@@ -34,5 +34,8 @@ namespace RacingWebScrape.Models
         //Reference to the url where the full result information can be scraped
         public string FullResultURL { get; set; }
 
+        //Race number in meeting result
+        public int RaceNumber { get; set; }
+
     }
 }

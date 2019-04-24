@@ -71,37 +71,54 @@ namespace RacingWebScrape.Repositories.MeetingResults
         #region Meeting Results
             public void AddMeetingResult(MeetingResult meetingResult)
             {
-                throw new NotImplementedException();
+                _context.Add(meetingResult);
             }
 
             public void DeleteMeetingResult(MeetingResult meetingResult)
             {
-                throw new NotImplementedException();
+                _context.Entry(meetingResult).State = EntityState.Deleted;
             }
 
             public void UpdateMeetingResult(MeetingResult meetingResult)
             {
-                throw new NotImplementedException();
+                _context.Entry(meetingResult).State = EntityState.Modified;
             }
 
             public MeetingResult GetMeetingResultByRaceNo(int courseId, int raceNo)
             {
-                throw new NotImplementedException();
+                return _context.MeetingResults
+                    .Include(i => i.CourseMeeting)
+                    .Include(i => i.ResultEntries)
+                    .Where(i => i.CourseMeeting.CourseId == courseId 
+                            && i.RaceNumber == raceNo )
+                    .FirstOrDefault();
             }
 
             public MeetingResult GetMeetingResultByTime(DateTime time)
             {
-                throw new NotImplementedException();
+                return _context.MeetingResults
+                    .Include(i => i.CourseMeeting)
+                    .Include(i => i.ResultEntries)
+                    .Where(i => i.RaceTime == time)
+                    .FirstOrDefault();
             }
 
-            public IEnumerable<MeetingResult> GetTodaysMeetingResults(MeetingResult meetingResult)
+            public IEnumerable<MeetingResult> GetTodaysMeetingResults()
             {
-                throw new NotImplementedException();
+                return _context.MeetingResults
+                    .Include(i => i.CourseMeeting)
+                    .Include(i => i.ResultEntries)
+                    .Where(i => i.CourseMeeting.MeetingDate == DateTime.Today)
+                    .ToList();
             }
 
             public IEnumerable<MeetingResult> GetMeetingResultsByCourse(int courseId, DateTime? Date)
             {
-                throw new NotImplementedException();
+                return _context.MeetingResults
+                    .Include(i => i.CourseMeeting)
+                    .Include(i => i.ResultEntries)
+                    .Where(i => i.CourseMeeting.MeetingDate == DateTime.Today)
+                    .ToList();
             }
         #endregion
 

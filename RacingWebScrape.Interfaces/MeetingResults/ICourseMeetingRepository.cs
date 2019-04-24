@@ -22,7 +22,7 @@ namespace RacingWebScrape.Interfaces.MeetingResults
         void DeleteMeetingResult(MeetingResult meetingResult);
         MeetingResult GetMeetingResultByTime(DateTime time);
         MeetingResult GetMeetingResultByRaceNo(int courseId, int raceNo);
-        IEnumerable<MeetingResult> GetTodaysMeetingResults(MeetingResult meetingResult);
+        IEnumerable<MeetingResult> GetTodaysMeetingResults();
         IEnumerable<MeetingResult> GetMeetingResultsByCourse(int courseId, DateTime? Date);
 
 
