@@ -126,26 +126,32 @@ namespace RacingWebScrape.Repositories.MeetingResults
         #region Results entry
             public void AddResultEntry(ResultEntry resultEntry)
             {
-                throw new NotImplementedException();
+                _context.ResultEntires.Add(resultEntry);
             }
         
             public void UpdateResultEntry(ResultEntry resultEntry)
             {
-                throw new NotImplementedException();
+                _context.Entry(resultEntry).State = EntityState.Modified;
             }
 
             public void DeleteResultEntry(ResultEntry resultEntry)
             {
-                throw new NotImplementedException();
+                _context.Entry(resultEntry).State = EntityState.Deleted;
             }
             public ResultEntry GetResultEntry(int id)
             {
-                throw new NotImplementedException();
+                return _context.ResultEntires
+                    .Include(i => i.MeetingResult)
+                    .Where(i => i.Id == id)
+                    .FirstOrDefault();
             }
 
             public IEnumerable<ResultEntry> GetMeetingResultEntries(int meetingResultId)
             {
-                throw new NotImplementedException();
+                return _context.ResultEntires
+                    .Include(i => i.MeetingResult)
+                    .Where(i => i.MeetingResultId == meetingResultId)
+                    .ToList();
             }
         #endregion
     }
