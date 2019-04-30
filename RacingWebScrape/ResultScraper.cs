@@ -76,9 +76,9 @@ namespace RacingWebScrape
                     foreach (var meetingResult in node.Descendants("div").ToList())
                     {
                         //Collect Content Nodes
-                        var titleNode = meetingResult.Descendants("a").FirstOrDefault();
-                        var fullResultUrl = titleNode.Attributes["href"].Value;
-                        var raceTimeNode = meetingResult.Descendants("span").FirstOrDefault();
+                        var titleNode = meetingResult.Descendants().Where(i => i.HasClass("results-title")).FirstOrDefault();
+                        var fullResultUrl = titleNode.Attributes["href"] != null ? titleNode.Attributes["href"].Value : "URL PENDING";
+                        var raceTimeNode = meetingResult.Descendants().Where(i => i.HasClass("results-time")).FirstOrDefault();
 
                         var newMeetingResult = new MeetingResult();
                         newMeetingResult.RaceTitle = HttpUtility.HtmlDecode(titleNode?.InnerHtml.ToString());
@@ -88,7 +88,7 @@ namespace RacingWebScrape
                         if (meetingResult.SelectNodes(".//tr") != null)
                         {
                             Console.WriteLine(" ");
-                            Console.WriteLine(titleNode.InnerHtml.ToString());
+                            Console.WriteLine(HttpUtility.HtmlDecode(titleNode?.InnerHtml.ToString()));
                             Console.WriteLine("Time: " + raceTimeNode.InnerHtml.ToString());
 
                             var resultsNodes = meetingResult.SelectNodes(".//tr").Where(n => n.HasClass("results-place")).ToList();
