@@ -40,7 +40,12 @@ namespace RacingWebScrape.Repositories.MeetingResults
                 }
             }
 
-            public CourseMeeting GetMeeting(int id)
+            public void UpdateCourseMeetingResults(CourseMeeting courseMeeting)
+            {
+                _context.Entry(courseMeeting).State = EntityState.Modified;
+            }
+
+            public CourseMeeting GetCourseMeeting(int id)
             {
                 return _context.CourseMeetings
                     .Include(i => i.MeetingResults)
@@ -65,11 +70,20 @@ namespace RacingWebScrape.Repositories.MeetingResults
                     .Where(i => i.MeetingDate == DateTime.Today)
                     .ToList();
             }
+
+            public CourseMeeting GetCourseMeetingByDate(int courseId, DateTime date)
+            {
+                return _context.CourseMeetings
+                .Include(i => i.MeetingResults)
+                .Include(i => i.Course)
+                .Where(i => i.MeetingDate == date && i.CourseId == courseId)
+                .FirstOrDefault();
+            }
         #endregion
 
 
         #region Meeting Results
-            public void AddMeetingResult(MeetingResult meetingResult)
+        public void AddMeetingResult(MeetingResult meetingResult)
             {
                 _context.Add(meetingResult);
             }
@@ -94,7 +108,7 @@ namespace RacingWebScrape.Repositories.MeetingResults
                     .FirstOrDefault();
             }
 
-            public MeetingResult GetMeetingResultByTime(DateTime time)
+            public MeetingResult GetDailyMeetingResultByTime(DateTime time)
             {
                 return _context.MeetingResults
                     .Include(i => i.CourseMeeting)
@@ -120,11 +134,20 @@ namespace RacingWebScrape.Repositories.MeetingResults
                     .Where(i => i.CourseMeeting.MeetingDate == DateTime.Today)
                     .ToList();
             }
+
+            public MeetingResult GetCourseMeetingResultByTime(int courseMeetingId, DateTime time)
+            {
+                return _context.MeetingResults
+                .Include(i => i.CourseMeeting)
+                .Include(i => i.ResultEntries)
+                .Where(i => i.RaceTime == time && i.CourseMeetingId == courseMeetingId)
+                .FirstOrDefault();
+            }
         #endregion
 
 
         #region Results entry
-            public void AddResultEntry(ResultEntry resultEntry)
+        public void AddResultEntry(ResultEntry resultEntry)
             {
                 _context.ResultEntires.Add(resultEntry);
             }
@@ -153,6 +176,12 @@ namespace RacingWebScrape.Repositories.MeetingResults
                     .Where(i => i.MeetingResultId == meetingResultId)
                     .ToList();
             }
+
+      
+
+
+
+
         #endregion
     }
 }

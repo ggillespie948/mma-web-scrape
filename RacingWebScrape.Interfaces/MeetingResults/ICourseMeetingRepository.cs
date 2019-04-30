@@ -11,7 +11,9 @@ namespace RacingWebScrape.Interfaces.MeetingResults
         void AddMeeting(CourseMeeting courseMeeting);
         void DeleteMeeting(CourseMeeting courseMeeting);
         bool DoesCourseMeetingExist(CourseMeeting courseMeeting);
-        CourseMeeting GetMeeting(int id);
+        CourseMeeting GetCourseMeeting(int id);
+        CourseMeeting GetCourseMeetingByDate(int courseId, DateTime date);
+        void UpdateCourseMeetingResults(CourseMeeting courseMeeting);
         IEnumerable<CourseMeeting> GetTodaysMeetings();
         IEnumerable<CourseMeeting> GetMeetings();
 
@@ -20,7 +22,8 @@ namespace RacingWebScrape.Interfaces.MeetingResults
         void AddMeetingResult(MeetingResult meetingResult);
         void UpdateMeetingResult(MeetingResult meetingResult);
         void DeleteMeetingResult(MeetingResult meetingResult);
-        MeetingResult GetMeetingResultByTime(DateTime time);
+        MeetingResult GetDailyMeetingResultByTime(DateTime time);
+        MeetingResult GetCourseMeetingResultByTime(int courseMeetingId, DateTime time);
         MeetingResult GetMeetingResultByRaceNo(int courseId, int raceNo);
         IEnumerable<MeetingResult> GetTodaysMeetingResults();
         IEnumerable<MeetingResult> GetMeetingResultsByCourse(int courseId, DateTime? Date);
