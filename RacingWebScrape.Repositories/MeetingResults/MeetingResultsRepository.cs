@@ -62,10 +62,13 @@ namespace RacingWebScrape.Repositories.MeetingResults
                     .ToList();
             }
 
+            /// <summary>
+            /// Action which returns the today's meeting names
+            /// </summary>
+            /// <returns></returns>
             public IEnumerable<CourseMeeting> GetTodaysMeetings()
             {
                 return _context.CourseMeetings
-                    .Include(i => i.MeetingResults)
                     .Include(i => i.Course)
                     .Where(i => i.MeetingDate == DateTime.Today)
                     .ToList();
