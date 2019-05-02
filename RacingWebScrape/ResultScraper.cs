@@ -102,7 +102,7 @@ namespace RacingWebScrape
 
                         newMeetingResult.WinningJockey = jockeyTrainerNode?.First().Descendants("a").FirstOrDefault().InnerHtml;
                         newMeetingResult.WinningTrainer = jockeyTrainerNode?.Last().Descendants("a").FirstOrDefault().InnerHtml;
-                        newMeetingResult.RunnerInformation = HttpUtility.HtmlDecode(runnerInfoNode?.InnerHtml.ToString());
+                        newMeetingResult.RunnerInformation = HttpUtility.HtmlDecode(runnerInfoNode?.Descendants("td").FirstOrDefault().InnerHtml?.ToString());
 
                         newCourseMeeting.MeetingResults.Add(newMeetingResult);
 
@@ -133,9 +133,7 @@ namespace RacingWebScrape
                 nodeCount++;
             }
 
-
             Console.WriteLine("Daily meeting content nodes proccessing complete.");
-
         }
 
         private static bool ProcessMeetingResultEntries(HtmlNode meetingResultNode, ref MeetingResult meetingResult)
