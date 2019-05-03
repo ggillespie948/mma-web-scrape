@@ -32,7 +32,9 @@ namespace RacingWeb.API.Helpers
         public IEnumerable<MeetingResultDTO> MapMeetingResultsDTO(IEnumerable<MeetingResult> meetingResults,
             ref IMapper mapper)
         {
-            return mapper.Map<IEnumerable<MeetingResult>, IEnumerable<MeetingResultDTO>>(meetingResults);
+            var response = mapper.Map<IEnumerable<MeetingResult>, IEnumerable<MeetingResultDTO>>(meetingResults);
+
+            return response;
         }
     }
 

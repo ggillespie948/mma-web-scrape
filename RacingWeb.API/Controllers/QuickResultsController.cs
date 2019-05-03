@@ -31,7 +31,7 @@ namespace RacingWeb.API.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return Json(UnitOfWork.CourseMeetings.GetTodaysMeetingResults());
+            return Json(DTOHelper.Instance.MapMeetingResultsDTO(UnitOfWork.CourseMeetings.GetTodaysMeetingResults(), ref _mapper));
         }
 
         // GET api/<controller>/meetingnames
