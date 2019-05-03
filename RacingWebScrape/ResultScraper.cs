@@ -206,12 +206,16 @@ namespace RacingWebScrape
             if (horseTitleHtml.ElementAt(1).ToString() == ".")
             {
                 horseNumber = horseTitleHtml.Substring(0, 2);
-                return horseTitleHtml.Substring(2, horseTitleHtml.Length-2);
+                var horseName = horseTitleHtml.Substring(2, horseTitleHtml.Length - 2);
+                var pattern = @" \((.*?)\)";
+                return Regex.Replace(horseName, pattern, string.Empty);
 
             } else if (horseTitleHtml.ElementAt(2).ToString() == ".")
             {
                 horseNumber = horseTitleHtml.Substring(0, 3);
-                return horseTitleHtml.Substring(3, horseTitleHtml.Length - 3);
+                var horseName = horseTitleHtml.Substring(3, horseTitleHtml.Length - 3);
+                var pattern = @" \((.*?)\)";
+                return Regex.Replace(horseName, pattern, string.Empty);
             }
             else
             {
