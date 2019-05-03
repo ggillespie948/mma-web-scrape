@@ -12,8 +12,9 @@ namespace RacingWeb.API.MappingProfile
     {
         public MappingProfile()
         {
-            CreateMap<MeetingResult, MeetingResultDTO>().ReverseMap();
             CreateMap<ResultEntry, ResultEntryDTO>().ReverseMap();
+            CreateMap<MeetingResult, MeetingResultDTO>().ReverseMap()
+                    .ForMember(d => d.ResultEntries, opt => opt.MapFrom(s => s));
         }
     }
 }

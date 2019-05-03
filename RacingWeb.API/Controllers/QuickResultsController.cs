@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using RacingWeb.API.Helpers;
 using RacingWebScrape.Models;
 using RacingWebScrape.UnitOfWork;
 
@@ -18,9 +20,11 @@ namespace RacingWeb.API.Controllers
     public class QuickResultsController : Controller
     {
         public static IRacingUnitOfWork UnitOfWork;
-        public QuickResultsController(IRacingUnitOfWork unitOfWork)
+        private static IMapper _mapper;
+        public QuickResultsController(IRacingUnitOfWork unitOfWork, IMapper mapper)
         {
             UnitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         // GET: api/<controller>
@@ -40,12 +44,16 @@ namespace RacingWeb.API.Controllers
                     return Json(UnitOfWork.CourseMeetings.GetTodaysMeetings());
 
                 case "dailyResults":
-                    return Json(UnitOfWork.CourseMeetings.GetTodaysMeetingResults());
+                    return Json(DTOHelper.Instance.MapMeetingResultsDTO(UnitOfWork.CourseMeetings.GetTodaysMeetingResults(), ref _mapper));
 
                 default:
-                    return Json("no sub action hit.. try a different parameter");
+                    return Json("Error: 404");
             }
         }
+
+        
+
+
 
         // POST api/<controller>
         [HttpPost]
