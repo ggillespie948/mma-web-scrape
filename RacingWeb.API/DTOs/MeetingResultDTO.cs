@@ -15,7 +15,6 @@ namespace RacingWeb.API.DTOs
         public string RaceTitle { get; set; }
 
         public int CourseMeetingId { get; set; }
-        public CourseMeeting CourseMeeting { get; set; }
 
         /// <summary>
         /// Object containing each horse, position, jockey, trainer, price
