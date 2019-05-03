@@ -8,34 +8,32 @@ using System.Threading.Tasks;
 
 namespace RacingWeb.API.Helpers
 {
-    public static class DTOHelper
+    public sealed class DTOHelper
     {
-        public static void ConvertToDTo(Object obj, ref Mapper mapper)
-        {
-            switch (obj)
-            {
-                case MeetingResult meetingResult: return;
-                case MeetingResult meetingResults: return;
-                case ResultEntry meetingResult: return;
-            }
+        private static DTOHelper instance = null;
 
+        private DTOHelper()
+        {
 
         }
 
-        private static IEnumerable<MeetingResultDTO> MapMeetingResultsDTO(IEnumerable<MeetingResult> meetingResults, ref IMapper mapper)
+        public static DTOHelper Instance
         {
-            
-
-            foreach(var meetingResult in meetingResults)
+            get
             {
-                mapper.Map<MeetingResult>
-                
+                if(instance == null)
+                {
+                    instance = new DTOHelper();
+                }
+                return instance;
             }
-
         }
 
-        private static void MapMeetingResultDTO()
+        public IEnumerable<MeetingResultDTO> MapMeetingResultsDTO(IEnumerable<MeetingResult> meetingResults,
+            ref IMapper mapper)
         {
-
+            return mapper.Map<IEnumerable<MeetingResult>, IEnumerable<MeetingResultDTO>>(meetingResults);
         }
     }
+
+}
