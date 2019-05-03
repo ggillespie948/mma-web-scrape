@@ -1,5 +1,4 @@
-﻿using RacingWebScrape.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,9 +9,7 @@ namespace RacingWeb.API.DTOs
     {
         public int Id { get; set; } //remove?
 
-        public string Place { get; set; }
-
-        public MeetingResultDTO MeetingResult { get; set; }
+        public string Place { get; set; } 
 
         public string HorseName { get; set; }
 
