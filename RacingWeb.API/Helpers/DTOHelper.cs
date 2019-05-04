@@ -36,6 +36,24 @@ namespace RacingWeb.API.Helpers
 
             return response;
         }
+
+        public MeetingResultDTO MapMeetingResult(MeetingResult meetingResult,
+            ref IMapper mapper)
+        {
+            var response = mapper.Map<MeetingResult, MeetingResultDTO>(meetingResult);
+
+            return response;
+        }
+
+        public ResultEntryDTO MapResultEntryDTO(ResultEntry resultEntry,
+            ref IMapper mapper)
+        {
+            var response = mapper.Map<ResultEntry, ResultEntryDTO>(resultEntry);
+
+            return response;
+        }
+
+        
     }
 
 }
