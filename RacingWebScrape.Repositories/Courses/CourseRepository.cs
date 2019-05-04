@@ -40,7 +40,7 @@ namespace RacingWebScrape.Repositories
 
         public Course GetByName(string name)
         {
-            return _context.Courses.Where(i => i.Name == name).FirstOrDefault();
+            return _context.Courses.Where(i => i.Name.Contains(name)).FirstOrDefault();
         }
 
         public void Update(Course course)

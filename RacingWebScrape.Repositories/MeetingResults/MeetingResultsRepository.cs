@@ -107,7 +107,7 @@ namespace RacingWebScrape.Repositories.MeetingResults
                     .Include(i => i.CourseMeeting)
                     .Include(i => i.ResultEntries)
                     .Where(i => i.CourseMeeting.CourseId == courseId 
-                            && i.RaceNumber == raceNo )
+                            && i.RaceNumber == raceNo && i.RaceTime.Date == DateTime.Today )
                     .FirstOrDefault();
             }
 
@@ -116,7 +116,7 @@ namespace RacingWebScrape.Repositories.MeetingResults
                 return _context.MeetingResults
                     .Include(i => i.CourseMeeting)
                     .Include(i => i.ResultEntries)
-                    .Where(i => i.RaceTime == time)
+                    .Where(i => i.RaceTime == time && i.RaceTime.Date == DateTime.Today)
                     .FirstOrDefault();
             }
 
