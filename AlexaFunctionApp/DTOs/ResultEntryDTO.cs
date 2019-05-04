@@ -9,7 +9,9 @@ namespace RacingWeb.API.DTOs
     {
         public int Id { get; set; } //remove?
 
-        public string Place { get; set; } 
+        public string Place { get; set; }
+
+        public MeetingResultDTO MeetingResult { get; set; }
 
         public string HorseName { get; set; }
 
