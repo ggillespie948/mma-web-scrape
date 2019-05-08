@@ -14,6 +14,8 @@ namespace RacingWeb.API.DTOs
 
         public MeetingResultDTO MeetingResult { get; set; }
 
+        public int Position { get; set; }
+
         public string HorseName { get; set; }
 
         public string HorseNumber { get; set; }
