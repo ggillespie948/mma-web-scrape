@@ -15,6 +15,8 @@ namespace RacingWebScrape.Models
 
         public string Place { get; set; } // e.g. "1st" "2nd"
 
+        public int Position { get; set; }
+
         public string HorseName { get; set; }
 
         public string HorseNumber { get; set; }

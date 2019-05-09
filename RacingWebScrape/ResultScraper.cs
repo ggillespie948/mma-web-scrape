@@ -155,6 +155,8 @@ namespace RacingWebScrape
 
                     newResultsEntry.HorseName = horseName;
                     newResultsEntry.HorseNumber = horseNo;
+                    string processPos = Regex.Match(placeNode?.InnerHtml.ToString(), @"\d+").Value;
+                    newResultsEntry.Position = int.Parse(processPos);
                     newResultsEntry.Place = placeNode?.InnerHtml.ToString();
                     if (decimalNode != null)
                         newResultsEntry.PriceDecimal = decimal.Parse(decimalNode?.InnerHtml.ToString());
