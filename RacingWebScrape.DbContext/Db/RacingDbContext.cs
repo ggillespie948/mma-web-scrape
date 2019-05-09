@@ -16,7 +16,7 @@ namespace RacingWebScrape.Db
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string cn = @"Server=DESKTOP-BREO199\SQLEXPRESS;Database=RacingData;Trusted_Connection=False;MultipleActiveResultSets=true;User ID=garydev; Password="; //todo: add password
+            string cn = @"Server=tcp:gzgillespie.database.windows.net,1433;Initial Catalog=RacingData;Persist Security Info=False;User ID=garydev;Password=Parkplace!2345;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"; //todo: add password
             optionsBuilder.UseSqlServer(cn);
             base.OnConfiguring(optionsBuilder);
         }
