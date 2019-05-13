@@ -75,7 +75,7 @@ namespace RacingWeb.API.Controllers
                     } else { return Json("Error: course meeting not found"); }
 
                         default:
-                    return Json("Error: 404");
+                    return Json(null);
             }
         }
 
