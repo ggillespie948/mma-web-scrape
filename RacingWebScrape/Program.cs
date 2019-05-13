@@ -29,17 +29,28 @@ namespace RacingWebScrape
                 .AddTransient<IRacingUnitOfWork, UnitOfWork.UnitOfWork>()
                 .BuildServiceProvider();
 
-            //Begin Automatic Quick Scrape
-            HttpClient client = new HttpClient();
-            var response = await client.GetAsync("https://www.timeform.com/horse-racing/results/yesterday");
-            var pageContents = await response.Content.ReadAsStringAsync();
-            HtmlDocument pageDocument = new HtmlDocument();
-            pageDocument.LoadHtml(pageContents);
+            Console.WriteLine("Enter target scrape URL: ");
+            var HTML_TARGET = Console.ReadLine();
 
-            ResultScraper Scraper = new ResultScraper(serviceProvider.GetService<IRacingUnitOfWork>());
-            Scraper.ScrapeQuickResults(pageDocument);
 
-            Console.ReadLine();
+            if(HTML_TARGET == "" || HTML_TARGET == " ")
+            {
+                Console.WriteLine("ERROR: NULL HTML TARGET PARAMETER. PRESS ANY KET TO EXIT");
+
+            } else
+            {
+                HttpClient client = new HttpClient();
+                var response = await client.GetAsync(HTML_TARGET);
+                var pageContents = await response.Content.ReadAsStringAsync();
+                HtmlDocument pageDocument = new HtmlDocument();
+                pageDocument.LoadHtml(pageContents);
+
+                ResultScraper Scraper = new ResultScraper(serviceProvider.GetService<IRacingUnitOfWork>());
+                Scraper.ScrapeQuickResults(pageDocument);
+
+                Console.ReadLine();
+            }
+
         }
     }
 }
