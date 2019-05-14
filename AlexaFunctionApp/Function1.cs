@@ -20,6 +20,7 @@ using RacingWeb.API.DTOs;
 using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
+using Alexa.NET.Security.Functions;
 
 namespace RacingWebScrapeAlexaAzureFunction
 {
@@ -36,6 +37,12 @@ namespace RacingWebScrapeAlexaAzureFunction
 
             string json = await req.ReadAsStringAsync();
             var skillRequest = JsonConvert.DeserializeObject<SkillRequest>(json);
+
+            //Validate Request
+            // Verifies that the request is a valid request from Amazon Alexa 
+            var isValid = await skillRequest.ValidateRequestAsync(req, log);
+            if (!isValid)
+                return new BadRequestResult();
 
             SkillResponse response = null;
 
@@ -104,7 +111,7 @@ namespace RacingWebScrapeAlexaAzureFunction
 
             // Intent Repromprt Options
             // ------------------------
-            // N - reprompt course
+            // N - reprompt course <- removed due to picking up TODAY as TWO
             // repromt yes to inital launch request - {what racing is on today?}
 
 
@@ -120,43 +127,36 @@ namespace RacingWebScrapeAlexaAzureFunction
 
             if (course.Value != null && course.Value != "" && course.Value != " " && course.Value != "race" && course.Value.Length > 2)
             {
-                if(raceTime.Value != null)
+                if (raceTime.Value != null)
                 {
                     return GetResultByRaceTime(ConvertTimeTo24Hour(raceTime.Value, ref log), log);
 
-                } else if (raceNo.Value != null)
+                }
+                else if (raceNo.Value != null)
                 {
                     return GetResultByRaceNumberAtCourse(raceNo.Value, course.Value, log);
 
-                } else
+                }
+                else
                 {
                     return GetResultsSummaryAtCourse(course.Value, log);
                 }
 
-            } else if(raceTime.Value != null)
+            }
+            else if (raceTime.Value != null)
             {
                 return GetResultByRaceTime(ConvertTimeTo24Hour(raceTime.Value, ref log), log);
-
-            } else if(raceNo != null)
-            {
-                // *** prompt the {raceNo} at which course?    *** 
-                log.LogInformation("Race time not null, which course prompt!!! ");
-                intentRequest.DialogState = DialogState.InProgress;
-                responseSpeach += "Race " + raceNo.Value + " at which course?";
-
-                if (session.Attributes == null)
-                    session.Attributes = new Dictionary<string, object>();
-
-                session.Attributes["raceNumberCourseReprompt"] = raceNo.Value;
-                Reprompt reprompt = new Reprompt(responseSpeach);
-
-                return BuildResponse(responseSpeach, false, session, reprompt);
-
             } else
             {
-                //Could not handle intent
-                log.LogInformation("Could not handle intent");
-                responseSpeach += "Sorry I couldn't understand that. Ask for help for a list of commands.";
+                //What racing is on today?
+
+                var dailyMeetings = GetDailyMeetings(log, out int count);
+
+                responseSpeach += "There are " + count + " meetings in the UK today. They go at " + dailyMeetings + ".  ";
+                responseSpeach += "For results, ask me for a specific time, course, or race number. ";
+
+                //log.LogInformation("Could not handle intent");
+                //responseSpeach += "Sorry I couldn't understand that. Ask for help for a list of commands.";
                 return BuildResponse(responseSpeach);
             }
 
@@ -183,7 +183,7 @@ namespace RacingWebScrapeAlexaAzureFunction
                     }
                     else
                     {
-                        responseSpeach += (" The winner of the race was number " + resultEntry.HorseNumber + ", " + resultEntry.HorseName + ". ");
+                        responseSpeach += (" The winner of the " + raceTime + " was number " + resultEntry.HorseNumber + ", " + resultEntry.HorseName + ". ");
                         responseSpeach += (" Trained by " + result.WinningTrainer + ", Ridden by " + result.WinningJockey + ". ");
                         winnerAnnounced = true;
                     }
@@ -218,8 +218,6 @@ namespace RacingWebScrapeAlexaAzureFunction
 
             if (result != null && result.ResultEntries.Any())
             {
-                responseSpeach += "The results of race " + raceNumber + " at " + course + " today are: ";
-
                 bool winnerAnnounced = false;
                 foreach (var resultEntry in result.ResultEntries.OrderBy(i => i.Position))
                 {
@@ -229,7 +227,7 @@ namespace RacingWebScrapeAlexaAzureFunction
                     }
                     else
                     {
-                        responseSpeach += (" The winner of the race was number " + resultEntry.HorseNumber + ", " + resultEntry.HorseName + ". ");
+                        responseSpeach += (" The winner of race " + raceNumber + " at " + course +" was number " + resultEntry.HorseNumber + ", " + resultEntry.HorseName + ". ");
                         responseSpeach += (" Trained by " + result.WinningTrainer + ", Ridden by " + result.WinningJockey + ". ");
                         winnerAnnounced = true;
                     }
@@ -237,7 +235,7 @@ namespace RacingWebScrapeAlexaAzureFunction
             }
             else
             {
-                responseSpeach += "There are no results for race " + raceNumber + "at " + course + "yet. Would you like to hear an overview of the results at " + course +" so far today?";
+                responseSpeach += "There are no results for race " + raceNumber + "at " + course + "yet."; // Would you like to hear an overview of the results at " + course +" so far today?";
                 return BuildResponse(responseSpeach);
             }
 
@@ -282,7 +280,7 @@ namespace RacingWebScrapeAlexaAzureFunction
 
                 if (result != null)
                 {
-                    if (result.Any())
+                    if (result.Where(i=>i.ResultEntries != null && i.ResultEntries.Count > 0).Any())
                     {
                         responseSpeach += "The results at" + course + " today are: ";
 
