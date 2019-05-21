@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MMAWeb.Interfaces", "MMAWeb.Interfaces\MMAWeb.Interfaces.csproj", "{76806B7E-4D9D-4D90-8547-8E11E488D7BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MMAWeb.Models", "MMAWeb.Models\MMAWeb.Models.csproj", "{9BB0A431-E2E4-48C4-9229-3ADF9AE83DFD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MMAWeb.Db", "MMAWeb.Db\MMAWeb.Db.csproj", "{FA85CDAB-0651-411B-BBCB-5A71BDD3C1AB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9BB0A431-E2E4-48C4-9229-3ADF9AE83DFD} = {9BB0A431-E2E4-48C4-9229-3ADF9AE83DFD}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MMAWeb.UnitOfWork", "MMAWeb.UnitOfWork\MMAWeb.UnitOfWork.csproj", "{4E890970-8133-4D4C-BD51-7CAE847D7E46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MMAWebScrape.AzureFunction", "MMAWebScrape.AzureFunction\MMAWebScrape.AzureFunction.csproj", "{710BC921-248A-4770-A770-7BDD10341117}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{76806B7E-4D9D-4D90-8547-8E11E488D7BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76806B7E-4D9D-4D90-8547-8E11E488D7BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76806B7E-4D9D-4D90-8547-8E11E488D7BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76806B7E-4D9D-4D90-8547-8E11E488D7BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BB0A431-E2E4-48C4-9229-3ADF9AE83DFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BB0A431-E2E4-48C4-9229-3ADF9AE83DFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BB0A431-E2E4-48C4-9229-3ADF9AE83DFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BB0A431-E2E4-48C4-9229-3ADF9AE83DFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA85CDAB-0651-411B-BBCB-5A71BDD3C1AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA85CDAB-0651-411B-BBCB-5A71BDD3C1AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA85CDAB-0651-411B-BBCB-5A71BDD3C1AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA85CDAB-0651-411B-BBCB-5A71BDD3C1AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E890970-8133-4D4C-BD51-7CAE847D7E46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E890970-8133-4D4C-BD51-7CAE847D7E46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E890970-8133-4D4C-BD51-7CAE847D7E46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E890970-8133-4D4C-BD51-7CAE847D7E46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{710BC921-248A-4770-A770-7BDD10341117}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{710BC921-248A-4770-A770-7BDD10341117}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{710BC921-248A-4770-A770-7BDD10341117}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{710BC921-248A-4770-A770-7BDD10341117}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CE514EE4-AA73-4F8C-9F16-CBBE64061D37}
+	EndGlobalSection
+EndGlobal
