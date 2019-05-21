@@ -1,5 +1,0 @@
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=RacingData;Trusted_Connection=False;MultipleActiveResultSets=true;"
-  }
-}
