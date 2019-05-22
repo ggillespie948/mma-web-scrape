@@ -25,7 +25,10 @@ namespace MMAWebScrape
         }
         private static List<string> DailyMeetingTitles { get; set; }
         //Raw html node collections, unprocessed
-        private static HtmlNodeCollection DailyMeetingTitleNodes { get; set; }
+        private static HtmlNodeCollection DailyMeetingTitleNodes { get; set; } //to be deleted
+
+
+
         private static HtmlNode EventContainer { get; set; }
         private static HtmlNodeCollection EventResultsContentNodes { get; set; }
         private static HtmlNodeCollection EventTitleNodes { get; set; }
@@ -39,11 +42,7 @@ namespace MMAWebScrape
             EventTitleNodes = EventContainer.SelectNodes(".//h2");
             EventTitleNodes = EventContainer.SelectNodes(".//h3");
 
-            //ProcessEventContentNodes
-            //ProcessTitleNode
-            //ProcessEventDateNodes
-
-            RetrieveDailyMeetingContentNodes(ref pageDocument);
+            ProcessEventResults();
         }
 
         private void ProcessEventResults()
@@ -55,12 +54,106 @@ namespace MMAWebScrape
                 promotionMeeting.Title = ProcessEventTitle(EventTitleNodes.ElementAt(counter), out int promotionId);
                 promotionMeeting.PromotionId = promotionId;
                 // assign promoiton via id search
+                promotionMeeting.Date = ProcessTimeNode(EventDateNodes.ElementAt(counter));
+                promotionMeeting.FightResults = new List<FightResult>();
 
-                
+                var mainCardNode = node.SelectSingleNode("//div[@class='m-mmaf-pte-event-list'][1]");
+                var underCardNode = node.SelectSingleNode("//div[@class='m-mmaf-pte-event-list'][2]");
 
+                //process maincard
+                foreach(var fightResultNode in mainCardNode.Descendants().ElementAt(1).Descendants())
+                {
+                    var fightResult = new FightResult();
 
+                    fightResult.IsMainCard = true;
+
+                    if(ProcessFighterNames(fightResultNode.Descendants().ElementAt(0).InnerHtml, out string[] fighterNames))
+                    {
+                        fightResult.FighterNameA = fighterNames[0];
+                        fightResult.FighterNameB = fighterNames[1];
+                    }
+
+                    //sometimes there is an additional <span> if the fight is a title fight
+                    if(fightResultNode.Descendants().Count() == 3)
+                    {
+                        fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants().ElementAt(2).InnerHtml);
+
+                    } else if (fightResultNode.Descendants().Count() == 2)
+                    {
+                        fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants().ElementAt(2).InnerHtml);
+                    }
+
+                    promotionMeeting.FightResults.Add(fightResult);
+                }
+
+                //process undercard
+                foreach (var fightResultNode in mainCardNode.Descendants().ElementAt(1).Descendants())
+                {
+                    var fightResult = new FightResult();
+
+                    fightResult.IsMainCard = false;
+
+                    if (ProcessFighterNames(fightResultNode.Descendants().ElementAt(0).InnerHtml, out string[] fighterNames))
+                    {
+                        fightResult.FighterNameA = fighterNames[0];
+                        fightResult.FighterNameB = fighterNames[1];
+                    }
+
+                    if (fightResultNode.Descendants().Count() == 3)
+                    {
+                        fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants().ElementAt(2).InnerHtml);
+
+                    }
+                    else if (fightResultNode.Descendants().Count() == 2)
+                    {
+                        fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants().ElementAt(2).InnerHtml);
+                    }
+
+                    promotionMeeting.FightResults.Add(fightResult);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Parses two fighter names from decision summary and returns true if two parsed names can currently be returned
+        /// the array of parsed fighter names is is returned via an out parameter in conjunction with a success boolean.
+        /// </summary>
+        private bool ProcessFighterNames(string htmlContent, out string[]fighternames)
+        {
+            //search for "def." or "vs."
+            if(htmlContent.Contains("def."))
+            {
+                fighternames = htmlContent.Split("def.");
+                if(fighternames.Length == 2) return true;
+
+            } else if (htmlContent.Contains("vs."))
+            {
+                fighternames = htmlContent.Split("vs.");
+                if (fighternames.Length == 2) return true;
+
+            } else
+            {
+                fighternames = null;
             }
 
+            return false;
+        }
+
+
+        /// <summary>
+        /// process decision string to make more readable by Alexa
+        /// </summary>
+        /// <param name="decisionString"></param>
+        /// <returns></returns>
+        private string ProcessFightDecision(string decisionString)
+        {
+            decisionString = decisionString.Replace("def.", "defeated");
+            return decisionString;
+        }
+
+        private DateTime ProcessTimeNode(HtmlNode node)
+        {
+            return DateTime.Parse(node.Descendants("a").FirstOrDefault().InnerHtml);
         }
 
         private string ProcessEventTitle(HtmlNode titleNode, out int promotionId)
@@ -293,31 +386,9 @@ namespace MMAWebScrape
                     }
                 }
             }
-            EventResultsContentNodes = dailyMeetingContentNodes;
             DailyMeetingTitles = dailyMeetingTitles;
         }
 
-        private static void PrintDailyMeetingTitles()
-        {
-            Console.WriteLine("There are " + DailyMeetingTitles.Count + " meetings Today");
-
-            int counter = 0;
-            foreach (var meeting in DailyMeetingTitles)
-            {
-                counter++;
-                Console.WriteLine(counter + ". " + meeting);
-            }
-        }
-
-        private static void ProcessMeetingContentNode()
-        {
-
-        }
-
-        private static void PrintDailyResults()
-        {
-
-        }
 
     }
 }
