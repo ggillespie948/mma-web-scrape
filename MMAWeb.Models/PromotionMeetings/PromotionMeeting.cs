@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Linq;
-using MMAWeb.Interfaces.Promotions;
+using MMAWeb.Models.Promotions;
+using MMAWeb.Models.PromotionMeetings;
 
-namespace MMAWeb.Interfaces.PromotionMeetings
+namespace MMAWeb.Models.PromotionMeetings
 {
     public class PromotionMeeting
     {

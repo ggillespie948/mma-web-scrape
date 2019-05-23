@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
-using MMAWeb.Interfaces.PromotionMeetings;
+using MMAWeb.Models.PromotionMeetings;
 
-namespace MMAWeb.Interfaces.Promotions
+namespace MMAWeb.Models.Promotions
 {
     public class Promotion
     {
