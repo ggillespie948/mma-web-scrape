@@ -24,9 +24,8 @@ namespace MMAWebScrape
         {
             DbContext = unitOfWork;
         }
+        
         //Raw html node collections, unprocessed
-        private static HtmlNodeCollection DailyMeetingTitleNodes { get; set; } //to be deleted
-
         private static HtmlNode EventContainer { get; set; }
         private static HtmlNodeCollection EventResultsContentNodes { get; set; }
         private static HtmlNodeCollection EventTitleNodes { get; set; }
@@ -37,8 +36,6 @@ namespace MMAWebScrape
             //meeting titles are used to retrieve the id's for retrieving content nodes
             EventContainer = pageDocument.DocumentNode.SelectSingleNode("//div[@class='m-mmaf-pte-event-list']");
              
-            // try adding the split searches here ??? ***
-
             EventResultsContentNodes = EventContainer.SelectNodes(".//div[@class='m-mmaf-pte-event-list__split-item']");
             EventTitleNodes = EventContainer.SelectNodes(".//h2");
             EventDateNodes = EventContainer.SelectNodes(".//h3");
@@ -48,6 +45,11 @@ namespace MMAWebScrape
             Console.WriteLine("Reslts complete");
         }
 
+        /// <summary>
+        /// This method takes the globally available EventResultsContent nodes and iterates over them, in the process attempting
+        /// to create a new PromotionMeeting instance, checking for an existing record, before then creating or updating both the maincard and undercard 
+        /// results. To be split up at a future point.
+        /// </summary>
         private void ProcessEventResults()
         {
             var counter = 0;
@@ -105,10 +107,7 @@ namespace MMAWebScrape
                     if(fightResultNodes.Count >= i)
                     {
                         mainCardNode.Add(fightResultNodes[i]);
-                    } else
-                    {
-                        Console.WriteLine("wtf");
-                    }
+                    } 
 
                 }
 
@@ -119,10 +118,7 @@ namespace MMAWebScrape
                     if (fightResultNodes.Count >= i)
                     {
                         underCardNode.Add(fightResultNodes[i]);
-                    } else
-                    {
-                        Console.WriteLine("wtf");
-                    }
+                    } 
                 }
 
                 if (mainCardNode.Count > counter)
@@ -155,7 +151,6 @@ namespace MMAWebScrape
                     
                     }
                 }
-
 
                 Console.WriteLine("main card processed");
 
@@ -237,12 +232,24 @@ namespace MMAWebScrape
             return decisionString;
         }
 
+        /// <summary>
+        /// Parse the DateTime from given html node in '01/05/2019 00:00:00' format (sql)
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         private DateTime ProcessTimeNode(HtmlNode node)
         {
             string str = node.Descendants().FirstOrDefault().InnerHtml;
             return DateTime.Parse(str);
         }
 
+        /// <summary>
+        /// Method which returns the parsed title of the event E.G. Fight Night 123: Jose Aldo vs Joe Bloggs along
+        /// with an out parameter which returns the storage ID for the represented promotion.
+        /// </summary>
+        /// <param name="titleNode"></param> - the HtmlNode element containing the title for the event
+        /// <param name="promotionId"></param>
+        /// <returns></returns>
         private string ProcessEventTitle(HtmlNode titleNode, out int promotionId)
         {
             string eventTitle = titleNode.Descendants("a").FirstOrDefault().InnerHtml;
