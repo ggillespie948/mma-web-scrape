@@ -12,7 +12,7 @@ namespace MMAWebScrape.AzureFunction
     {
         public static bool DoesPromotionMeetingExist(DateTime date, int promotionId, ref MMADbContext context)
         {
-            if (context.PromotionMeetings.Where(i => i.Date == date && i.PromotionId == promotionId).Any())
+            if (context.PromotionMeetings.Where(i => i.Date.Date == date.Date && i.PromotionId == promotionId).Any())
                 return true;
             else
                 return false;
@@ -32,7 +32,10 @@ namespace MMAWebScrape.AzureFunction
 
         public static PromotionMeeting GetPromotionMeetingByDate(DateTime dateTime, int promotionId, ref MMADbContext context)
         {
-            return context.PromotionMeetings.Where(i => i.Date == dateTime && i.PromotionId == promotionId).FirstOrDefault();
+            return context.PromotionMeetings.Where(i => i.Date == dateTime && i.PromotionId == promotionId)
+                .Include(i => i.FightResults)
+                .Include(i => i.Promotion)
+                .FirstOrDefault();
         }
 
         public static void SaveChanges(ref MMADbContext context)
