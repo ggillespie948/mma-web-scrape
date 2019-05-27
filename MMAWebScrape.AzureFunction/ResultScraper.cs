@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using MMAWeb.Models.PromotionMeetings;
+using MMAWebScrape.AzureFunction;
 
 namespace MMAWebScrape
 {
@@ -18,16 +19,13 @@ namespace MMAWebScrape
     /// </summary>
     public class ResultScraper
     {
-        public static MMADbContext DbContext;
+        private static MMADbContext DbContext;
         public ResultScraper(MMADbContext unitOfWork)
         {
             DbContext = unitOfWork;
         }
-        private static List<string> DailyMeetingTitles { get; set; }
         //Raw html node collections, unprocessed
         private static HtmlNodeCollection DailyMeetingTitleNodes { get; set; } //to be deleted
-
-
 
         private static HtmlNode EventContainer { get; set; }
         private static HtmlNodeCollection EventResultsContentNodes { get; set; }
@@ -38,11 +36,16 @@ namespace MMAWebScrape
         {
             //meeting titles are used to retrieve the id's for retrieving content nodes
             EventContainer = pageDocument.DocumentNode.SelectSingleNode("//div[@class='m-mmaf-pte-event-list']");
+             
+            // try adding the split searches here ??? ***
+
             EventResultsContentNodes = EventContainer.SelectNodes(".//div[@class='m-mmaf-pte-event-list__split-item']");
             EventTitleNodes = EventContainer.SelectNodes(".//h2");
-            EventTitleNodes = EventContainer.SelectNodes(".//h3");
+            EventDateNodes = EventContainer.SelectNodes(".//h3");
 
             ProcessEventResults();
+
+            Console.WriteLine("Reslts complete");
         }
 
         private void ProcessEventResults()
@@ -50,67 +53,149 @@ namespace MMAWebScrape
             var counter = 0;
             foreach(var node in EventResultsContentNodes.Elements())
             {
+                Console.WriteLine("Promotion meeting process entry");
                 var promotionMeeting = new PromotionMeeting();
+
+                if(!(EventDateNodes.Count > counter))
+                {
+                    Console.WriteLine("End of results.");
+                    break;
+                }
+
+                DateTime promotionDate = ProcessTimeNode(EventDateNodes.ElementAt(counter));
                 promotionMeeting.Title = ProcessEventTitle(EventTitleNodes.ElementAt(counter), out int promotionId);
-                promotionMeeting.PromotionId = promotionId;
-                // assign promoiton via id search
-                promotionMeeting.Date = ProcessTimeNode(EventDateNodes.ElementAt(counter));
-                promotionMeeting.FightResults = new List<FightResult>();
 
-                var mainCardNode = node.SelectSingleNode("//div[@class='m-mmaf-pte-event-list'][1]");
-                var underCardNode = node.SelectSingleNode("//div[@class='m-mmaf-pte-event-list'][2]");
 
-                //process maincard
-                foreach(var fightResultNode in mainCardNode.Descendants().ElementAt(1).Descendants())
+                Console.WriteLine("Checking for existing promotion meeting..");
+                if (MMADataService.DoesPromotionMeetingExist(promotionDate, promotionId, ref DbContext))
                 {
-                    var fightResult = new FightResult();
-
-                    fightResult.IsMainCard = true;
-
-                    if(ProcessFighterNames(fightResultNode.Descendants().ElementAt(0).InnerHtml, out string[] fighterNames))
+                    promotionMeeting = MMADataService.GetPromotionMeetingByDate(promotionDate, promotionId, ref DbContext);
+                    if (promotionMeeting.FightResults != null)
                     {
-                        fightResult.FighterNameA = fighterNames[0];
-                        fightResult.FighterNameB = fighterNames[1];
+                        promotionMeeting.FightResults.Clear(); //update with latest results
+                    } else
+                    {
+                        promotionMeeting.FightResults = new List<FightResult>();
                     }
+                    Console.WriteLine("found..");
 
-                    //sometimes there is an additional <span> if the fight is a title fight
-                    if(fightResultNode.Descendants().Count() == 3)
-                    {
-                        fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants().ElementAt(2).InnerHtml);
+                } else
+                {
+                    Console.WriteLine("new promotion meeting..");
+                    // assign promoiton via id search
+                    promotionMeeting.PromotionId = promotionId;
+                    promotionMeeting.Date = promotionDate;
+                    promotionMeeting.FightResults = new List<FightResult>();
 
-                    } else if (fightResultNode.Descendants().Count() == 2)
-                    {
-                        fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants().ElementAt(2).InnerHtml);
-                    }
-
-                    promotionMeeting.FightResults.Add(fightResult);
+                    MMADataService.AddPromotionMeeting(promotionMeeting, ref DbContext);
+                    MMADataService.SaveChanges(ref DbContext);
                 }
 
-                //process undercard
-                foreach (var fightResultNode in mainCardNode.Descendants().ElementAt(1).Descendants())
+                Console.WriteLine("Get fight result nodes..");
+                // get results nodes
+                var fightResultNodes = node.SelectNodes("//div[@class='m-mmaf-pte-event-list__split']"); //[1] mc, [2] uc [3] mc 
+
+                var mainCardNode = new List<HtmlNode>();
+                var  underCardNode = new List<HtmlNode>();
+
+                //main card
+                Console.WriteLine("adding main card nodes..");
+                for (int i = 0; i < fightResultNodes.Count(); i += 2)
                 {
-                    var fightResult = new FightResult();
-
-                    fightResult.IsMainCard = false;
-
-                    if (ProcessFighterNames(fightResultNode.Descendants().ElementAt(0).InnerHtml, out string[] fighterNames))
+                    if(fightResultNodes.Count >= i)
                     {
-                        fightResult.FighterNameA = fighterNames[0];
-                        fightResult.FighterNameB = fighterNames[1];
+                        mainCardNode.Add(fightResultNodes[i]);
+                    } else
+                    {
+                        Console.WriteLine("wtf");
                     }
 
-                    if (fightResultNode.Descendants().Count() == 3)
-                    {
-                        fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants().ElementAt(2).InnerHtml);
-
-                    }
-                    else if (fightResultNode.Descendants().Count() == 2)
-                    {
-                        fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants().ElementAt(2).InnerHtml);
-                    }
-
-                    promotionMeeting.FightResults.Add(fightResult);
                 }
+
+                //under card
+                Console.WriteLine("adding under card nodes..");
+                for (int i=1; i< (fightResultNodes.Count()-1); i+=2)
+                {
+                    if (fightResultNodes.Count >= i)
+                    {
+                        underCardNode.Add(fightResultNodes[i]);
+                    } else
+                    {
+                        Console.WriteLine("wtf");
+                    }
+                }
+
+                if (mainCardNode.Count > counter)
+                {
+                    //process maincard
+                    foreach (var fightResultNode in mainCardNode[counter].Descendants("li"))
+                    {
+                        var fightResult = new FightResult();
+
+                        fightResult.PromotionMeeting = promotionMeeting;
+                        fightResult.IsMainCard = true;
+
+                        if(ProcessFighterNames(fightResultNode.Descendants("a").FirstOrDefault().InnerHtml, out string[] fighterNames))
+                        {
+                            fightResult.FighterNameA = fighterNames[0];
+                            fightResult.FighterNameB = fighterNames[1];
+                        }
+
+                        //sometimes there is an additional <span> if the fight is a title fight
+                        if(fightResultNode.Descendants("span").Count() == 1)
+                        {
+                            fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants("span").FirstOrDefault().InnerHtml);
+
+                        } else if (fightResultNode.Descendants("span").Count() == 2)
+                        {
+                            fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants("span").LastOrDefault().InnerHtml);
+                        }
+
+                        promotionMeeting.FightResults.Add(fightResult);
+                    
+                    }
+                }
+
+
+                Console.WriteLine("main card processed");
+
+                if (underCardNode.Count > counter)
+                {
+                    //process undercard
+                    foreach (var fightResultNode in underCardNode[counter].Descendants("li"))
+                    {
+                        var fightResult = new FightResult();
+
+                        fightResult.PromotionMeeting = promotionMeeting;
+                        fightResult.IsMainCard = false;
+
+                        if (ProcessFighterNames(fightResultNode.Descendants("a").FirstOrDefault().InnerHtml, out string[] fighterNames))
+                        {
+                            fightResult.FighterNameA = fighterNames[0];
+                            fightResult.FighterNameB = fighterNames[1];
+                        }
+
+                        //sometimes there is an additional <span> if the fight is a title fight
+                        if (fightResultNode.Descendants("span").Count() == 1)
+                        {
+                            fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants("span").FirstOrDefault().InnerHtml);
+
+                        }
+                        else if (fightResultNode.Descendants("span").Count() == 2)
+                        {
+                            fightResult.DecisionSummary = ProcessFightDecision(fightResultNode.Descendants("span").LastOrDefault().InnerHtml);
+                        }
+
+                        promotionMeeting.FightResults.Add(fightResult);
+                    }
+                }
+
+                Console.WriteLine("under card processed");
+
+                MMADataService.UpdatePromotionMeeting(promotionMeeting, ref DbContext);
+                MMADataService.SaveChanges(ref DbContext);
+
+                counter++;
             }
         }
 
@@ -148,12 +233,14 @@ namespace MMAWebScrape
         private string ProcessFightDecision(string decisionString)
         {
             decisionString = decisionString.Replace("def.", "defeated");
+            decisionString = decisionString.Replace("def ", "defeated ");
             return decisionString;
         }
 
         private DateTime ProcessTimeNode(HtmlNode node)
         {
-            return DateTime.Parse(node.Descendants("a").FirstOrDefault().InnerHtml);
+            string str = node.Descendants().FirstOrDefault().InnerHtml;
+            return DateTime.Parse(str);
         }
 
         private string ProcessEventTitle(HtmlNode titleNode, out int promotionId)
@@ -161,19 +248,19 @@ namespace MMAWebScrape
             string eventTitle = titleNode.Descendants("a").FirstOrDefault().InnerHtml;
             if (eventTitle.Contains("UFC"))
             {
-                promotionId = 1;
+                promotionId = 6;
             } else if (eventTitle.Contains("Bellator"))
             {
-                promotionId = 2;
+                promotionId = 7;
             } else if (eventTitle.Contains("One"))
             {
-                promotionId = 3;
+                promotionId = 8;
             } else if (eventTitle.Contains("Invicta"))
             {
-                promotionId = 4;
+                promotionId = 9;
             } else if (eventTitle.Contains("PFL"))
             {
-                promotionId = 5;
+                promotionId = 10;
             } else
             {
                 promotionId = 0;
@@ -386,7 +473,6 @@ namespace MMAWebScrape
                     }
                 }
             }
-            DailyMeetingTitles = dailyMeetingTitles;
         }
 
 
