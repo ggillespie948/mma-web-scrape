@@ -20,11 +20,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using Alexa.NET.Security.Functions;
+using MMAWeb.Db;
 
 namespace MMAWebScrapeAlexaAzureFunction
 {
-    public static class Function1
+    public class AlexaFunction
     {
+        public static MMADbContext DbContext;
+        public AlexaFunction(MMADbContext unitOfWork)
+        {
+            DbContext = unitOfWork;
+        }
 
         [FunctionName("Alexa")]
         public static async Task<IActionResult> Run(
@@ -77,9 +83,9 @@ namespace MMAWebScrapeAlexaAzureFunction
             log.LogInformation("Init HTTP Client..");
 
             //gather {slots}
-            intentRequest.Intent.Slots.TryGetValue("Course", out var promotion);
-            intentRequest.Intent.Slots.TryGetValue("RaceTime", out var eventDate);
-            intentRequest.Intent.Slots.TryGetValue("RaceNumber", out var day);
+            intentRequest.Intent.Slots.TryGetValue("Promotion", out var promotion);
+            intentRequest.Intent.Slots.TryGetValue("EventDate", out var eventDate);
+            intentRequest.Intent.Slots.TryGetValue("Day", out var day);
 
             var responseSpeach = "";
 
@@ -91,24 +97,17 @@ namespace MMAWebScrapeAlexaAzureFunction
             } else
             {
                 log.LogInformation("Session not null");
-
                 // !!!!!!! replace promotion.Value with session promotion
-
+                // process session to see if where u asked a reprompt for something
             }
-
-
-
-
 
 
             if (promotion.Value != null && promotion.Value != "" && promotion.Value != " " && promotion.Value.Length > 2)
             {
                 if (eventDate.Value != null)
                 {
-                    //get promotion results on eventDate
-
-                    //if no promotion result can be found then reprompt 404 error response
-                    BuildNotFoundErrorResponse(session, true);
+                    DateTime date = DateTime.Now; // temp!!!
+                    return GetPromotionEventByDate(log, date, session);
                 }
                 else if (day.Value != null)
                 {
@@ -117,33 +116,42 @@ namespace MMAWebScrapeAlexaAzureFunction
                     //if no promotion can be found on nearest given day date, then return a reprompt asking if they mean results title on given date
 
                     //if no promotion result can be found then reprompt 404 error response
-                    BuildNotFoundErrorResponse(session, true);
+                    return BuildNotFoundErrorResponse(session, true);
 
                 }
                 else
                 {
                     var reprompt = new Reprompt();
+                    reprompt.OutputSpeech = new PlainTextOutputSpeech
+                    {
+                        Text = "Would you like to hear the most recent " + promotion.Value.ToString() + " results?"
+                    };
 
-                    //Ask, would you like to hear
-
-
+                    return BuildResponse(reprompt.OutputSpeech.ToString(), false, session, reprompt);
                 }
 
             }
             else if(eventDate != null)
             {
                 //get promotion results on eventDate
+                DateTime date = DateTime.Now; // temp!!!!;
+                return GetPromotionEventByDate(log, date, session);
 
                 //if no promotion result can be found then reprompt 404 error response
-                BuildNotFoundErrorResponse(session, true);
+                
 
             } else
             {
                 //Could not parse any meaningful variables, reprompt
                 var reprompt = new Reprompt();
-                BuildErrorResponse(session, reprompt, true);
+                return BuildErrorResponse(session, reprompt, true);
             }
 
+        }
+
+        public static ObjectResult GetPromotionEventByDate(ILogger logger, DateTime date, Session session)
+        {
+            return BuildNotFoundErrorResponse(session, true);
         }
 
         //public static string GetDailyMeetings(ILogger log, out int numberOfMeetings)
