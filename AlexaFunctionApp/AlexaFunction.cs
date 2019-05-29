@@ -104,10 +104,10 @@ namespace MMAWebScrapeAlexaAzureFunction
                     return HandleQuickResultsIntent(intentRequest, session, log);
 
                 case "Amazon.YesIntent":
-                    break;
+                    return HandleYesNoIntent(intentRequest, session, log);
 
                 case "Amazon.NoIntent":
-                    break;
+                    return HandleYesNoIntent(intentRequest, session, log);
 
                 case "Amazon.StopIntent":
                     break;
@@ -125,6 +125,36 @@ namespace MMAWebScrapeAlexaAzureFunction
             return BuildErrorResponse(session, errorReprompt, true);
         }
 
+        public static ObjectResult HandleYesNoIntent(IntentRequest intentRequest, Session session, ILogger log)
+        {
+            if(session.Attributes["isMostRecentPromotionEventPrompt"] != null)
+            {
+                // Set this session attribute to null so this yes/no intent is not 
+                // trigger during future yesNo in same session
+                session.Attributes["isMostRecentPromotionEventPrompt"] = null;
+
+                if (session.Attributes["promotionId"] != null)
+                    return GetMostRecentPromotionEvent(int.Parse(session.Attributes["promotionId"].ToString()));
+
+                return BuildErrorResponse(session, null, true);
+
+
+            } else if (session.Attributes["somethingelse"] != null) //*
+            {
+                return BuildErrorResponse(session, null, true);//*
+
+            } else if (session.Attributes["something"] != null)//*
+            {
+                return BuildErrorResponse(session, null, true);//*
+            } else
+            {
+                return BuildErrorResponse(session, null, true);//*
+            }
+        }
+
+        
+       
+
         public static ObjectResult HandleQuickResultsIntent(IntentRequest intentRequest, Session session, ILogger log)
         {
             //gather {slots}
@@ -141,12 +171,7 @@ namespace MMAWebScrapeAlexaAzureFunction
                 }
                 else if (day.Value != null)
                 {
-                    //get promotion results on most recent day
-
-                    //if no promotion can be found on nearest given day date, then return a reprompt asking if they mean results title on given date
-
-                    //if no promotion result can be found then reprompt 404 error response
-                    return BuildNotFoundErrorResponse(session, true);
+                    return GetPromotionResultsByDay(day.Value.ToString());
                 }
                 else
                 {
@@ -172,14 +197,36 @@ namespace MMAWebScrapeAlexaAzureFunction
                 var reprompt = new Reprompt();
                 return BuildErrorResponse(session, reprompt, true);
             }
-
         }
+
+
+
+        #region MMADataServiceCalls
 
         public static ObjectResult GetPromotionEventByDate(ILogger logger, DateTime date, Session session)
         {
             return BuildNotFoundErrorResponse(session, true);
         }
 
+        public static ObjectResult GetMostRecentPromotionEvent(int promotionId)
+        {
+            throw new NotImplementedException();
+            // make call to method in MMA data serivce and retunr the results
+        }
+
+        public static ObjectResult GetPromotionResultsByDay (string day)
+        {
+            throw new NotImplementedException();
+            //return BuildNotFoundErrorResponse(session, true);
+
+            //parse day from string value payoff
+            // make call to method in MMA data serivce and retunr the results
+            //get promotion results on most recent day
+            //if no promotion can be found on nearest given day date, then return a reprompt asking if they mean results title on given date
+            //if no promotion result can be found then reprompt 404 error response
+        }
+
+        #endregion
 
         #region Generic
         private static string ConvertTimeTo24Hour(string raceTime, ref ILogger log)
