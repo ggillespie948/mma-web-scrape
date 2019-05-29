@@ -82,25 +82,55 @@ namespace MMAWebScrapeAlexaAzureFunction
             log.LogInformation("Handle intent request");
             log.LogInformation("Init HTTP Client..");
 
-            //gather {slots}
-            intentRequest.Intent.Slots.TryGetValue("Promotion", out var promotion);
-            intentRequest.Intent.Slots.TryGetValue("EventDate", out var eventDate);
-            intentRequest.Intent.Slots.TryGetValue("Day", out var day);
-
-            var responseSpeach = "";
-
+            //Check intentRequest for user session
             log.LogInformation("Checking session..");
             if (session == null)
             {
                 log.LogInformation("Session was null");
                 session = new Session();
-            } else
+            }
+            else
             {
                 log.LogInformation("Session not null");
                 // !!!!!!! replace promotion.Value with session promotion
                 // process session to see if where u asked a reprompt for something
             }
 
+
+            //handle intent request
+            switch (intentRequest.Intent.Name)
+            {
+                case "QuickResults":
+                    return HandleQuickResultsIntent(intentRequest, session, log);
+
+                case "Amazon.YesIntent":
+                    break;
+
+                case "Amazon.NoIntent":
+                    break;
+
+                case "Amazon.StopIntent":
+                    break;
+
+                case "Amazon.HelpIntent":
+                    break;
+
+                default:
+                    //Could not parse any meaningful variables, reprompt
+                    var reprompt = new Reprompt();
+                    return BuildErrorResponse(session, reprompt, true);
+            }
+
+            var errorReprompt = new Reprompt();
+            return BuildErrorResponse(session, errorReprompt, true);
+        }
+
+        public static ObjectResult HandleQuickResultsIntent(IntentRequest intentRequest, Session session, ILogger log)
+        {
+            //gather {slots}
+            intentRequest.Intent.Slots.TryGetValue("Promotion", out var promotion);
+            intentRequest.Intent.Slots.TryGetValue("EventDate", out var eventDate);
+            intentRequest.Intent.Slots.TryGetValue("Day", out var day);
 
             if (promotion.Value != null && promotion.Value != "" && promotion.Value != " " && promotion.Value.Length > 2)
             {
@@ -117,7 +147,6 @@ namespace MMAWebScrapeAlexaAzureFunction
 
                     //if no promotion result can be found then reprompt 404 error response
                     return BuildNotFoundErrorResponse(session, true);
-
                 }
                 else
                 {
@@ -131,16 +160,13 @@ namespace MMAWebScrapeAlexaAzureFunction
                 }
 
             }
-            else if(eventDate != null)
+            else if (eventDate != null)
             {
                 //get promotion results on eventDate
                 DateTime date = DateTime.Now; // temp!!!!;
                 return GetPromotionEventByDate(log, date, session);
-
-                //if no promotion result can be found then reprompt 404 error response
-                
-
-            } else
+            }
+            else
             {
                 //Could not parse any meaningful variables, reprompt
                 var reprompt = new Reprompt();
@@ -153,25 +179,6 @@ namespace MMAWebScrapeAlexaAzureFunction
         {
             return BuildNotFoundErrorResponse(session, true);
         }
-
-        //public static string GetDailyMeetings(ILogger log, out int numberOfMeetings)
-        //{
-        //    log.LogInformation("Get Daily Meetings..  ");
-        //    var httpRequest = MakeRequest("/quickresults/dailyMeetings");
-        //    log.LogInformation(httpRequest.Result);
-        //    var result = JsonConvert.DeserializeObject<IEnumerable<CourseMeetingDTO>>(httpRequest.Result);
-
-        //    string response = "";
-
-        //    numberOfMeetings = result.Count();
-
-        //    foreach(var courseMeeting in result)
-        //    {
-        //        response += " " + courseMeeting.Course.Name + ", ";
-        //    }
-
-        //    return response;
-        //}
 
 
         #region Generic
