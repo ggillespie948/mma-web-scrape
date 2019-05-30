@@ -15,12 +15,13 @@ using Microsoft.IdentityModel.Protocols;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using Alexa.NET.Security.Functions;
 using MMAWeb.Db;
+using MMAWebScrape.AzureFunction;
+using MMAWeb.Models.PromotionMeetings;
 
 namespace MMAWebScrapeAlexaAzureFunction
 {
@@ -166,12 +167,13 @@ namespace MMAWebScrapeAlexaAzureFunction
             {
                 if (eventDate.Value != null)
                 {
-                    DateTime date = DateTime.Now; // temp!!!
-                    return GetPromotionEventByDate(log, date, session);
+                    DateTime date = DateTime.Now; // temp!!
+                    var promotionId = promotion.Resolution.Authorities[0].Values[0].Value.Id;
+                    return GetPromotionEventByDate(log, date, int.Parse(promotionId), session);
                 }
                 else if (day.Value != null)
                 {
-                    return GetPromotionResultsByDay(day.Value.ToString());
+                    return GetEventsByDay(day.Value.ToString());
                 }
                 else
                 {
@@ -189,7 +191,7 @@ namespace MMAWebScrapeAlexaAzureFunction
             {
                 //get promotion results on eventDate
                 DateTime date = DateTime.Now; // temp!!!!;
-                return GetPromotionEventByDate(log, date, session);
+                return GetEventsByDate(log, date, session);
             }
             else
             {
@@ -199,13 +201,57 @@ namespace MMAWebScrapeAlexaAzureFunction
             }
         }
 
+        public ObjectResult ParseResultsToSpeach(PromotionMeeting eventMeeting, ILogger logger, Session session, bool mainCardOnly)
+        {
+            var response = "Here are the " + eventMeeting.Title + " results.";
+
+            if(mainCardOnly)
+            {
+                foreach(var result in eventMeeting.FightResults.Where(i=>i.IsMainCard))
+                {
+                    response += "" + result.DecisionSummary + ".";
+                }
+
+            } else
+            {
+                foreach (var result in eventMeeting.FightResults)
+                {
+                    response += "" + result.DecisionSummary + ".";
+                }
+            }
+
+            return BuildResponse(response);
+        }
 
 
         #region MMADataServiceCalls
 
-        public static ObjectResult GetPromotionEventByDate(ILogger logger, DateTime date, Session session)
+        public static ObjectResult GetPromotionEventByDate(ILogger logger, DateTime date, int promotionId, Session session)
         {
-            return BuildNotFoundErrorResponse(session, true);
+            var promotionEvent = MMADataService.GetPromotionMeetingByDate(date, promotionId, ref DbContext);
+
+            if(promotionEvent == null)
+            {
+                return BuildNotFoundErrorResponse(session, true);
+            } else
+            {
+                //Process Event Results
+                throw new NotImplementedException();
+            }
+        }
+
+        public static ObjectResult GetEventsByDate(ILogger logger, DateTime date, Session session)
+        {
+            var promotionEvent = MMADataService.GetEventsByDate(date, ref DbContext);
+            if(promotionEvent == null)
+            {
+                return BuildNotFoundErrorResponse(session, true);
+
+            } else
+            {
+                //process the list of event results
+                throw new NotImplementedException();
+            }
         }
 
         public static ObjectResult GetMostRecentPromotionEvent(int promotionId)
@@ -214,13 +260,32 @@ namespace MMAWebScrapeAlexaAzureFunction
             // make call to method in MMA data serivce and retunr the results
         }
 
-        public static ObjectResult GetPromotionResultsByDay (string day)
+        public static ObjectResult GetPromotionEventByDay (string day, int promotionId)
         {
             throw new NotImplementedException();
             //return BuildNotFoundErrorResponse(session, true);
 
             //parse day from string value payoff
-            // make call to method in MMA data serivce and retunr the results
+            // make call to method in MMA data serivce and return the results
+            //get promotion results on most recent day
+            //if no promotion can be found on nearest given day date, then return a reprompt asking if they mean results title on given date
+            //if no promotion result can be found then reprompt 404 error response
+        }
+
+        /// <summary>
+        /// Retrieves a list of events from the most recent occurence of a given day
+        /// note: it will return the most recent occurence which feature > 0 events
+        /// note 2: it will return null if no events can be found
+        /// </summary>
+        /// <param name="day"></param>
+        /// <returns></returns>
+        public static ObjectResult GetEventsByDay(string day)
+        {
+            throw new NotImplementedException();
+            //return BuildNotFoundErrorResponse(session, true);
+
+            //parse day from string value payoff
+            // make call to method in MMA data serivce and return the results
             //get promotion results on most recent day
             //if no promotion can be found on nearest given day date, then return a reprompt asking if they mean results title on given date
             //if no promotion result can be found then reprompt 404 error response
