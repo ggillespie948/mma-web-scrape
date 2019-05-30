@@ -128,17 +128,21 @@ namespace MMAWebScrapeAlexaAzureFunction
 
         public static ObjectResult HandleYesNoIntent(IntentRequest intentRequest, Session session, ILogger log)
         {
-            if(session.Attributes["isMostRecentPromotionEventPrompt"] != null)
+            if(session.Attributes["getMostRecentPromotionEventPrompt"] != null)
             {
                 // Set this session attribute to null so this yes/no intent is not 
                 // trigger during future yesNo in same session
                 session.Attributes["isMostRecentPromotionEventPrompt"] = null;
 
                 if (session.Attributes["promotionId"] != null)
-                    return GetMostRecentPromotionEvent(int.Parse(session.Attributes["promotionId"].ToString()));
-
-                return BuildErrorResponse(session, null, true);
-
+                {
+                    int promotionId = int.Parse(session.Attributes["promotionId"].ToString());
+                    session.Attributes["promotionId"] = null;
+                    return GetMostRecentPromotionEvent(log, promotionId, session);
+                } else
+                {
+                    return BuildErrorResponse(session, null, true);
+                }
 
             } else if (session.Attributes["somethingelse"] != null) //*
             {
@@ -165,10 +169,12 @@ namespace MMAWebScrapeAlexaAzureFunction
 
             if (promotion.Value != null && promotion.Value != "" && promotion.Value != " " && promotion.Value.Length > 2)
             {
+
+                var promotionId = promotion.Resolution.Authorities[0].Values[0].Value.Id;
+
                 if (eventDate.Value != null)
                 {
                     DateTime date = DateTime.Now; // temp!!
-                    var promotionId = promotion.Resolution.Authorities[0].Values[0].Value.Id;
                     return GetPromotionEventByDate(log, date, int.Parse(promotionId), session);
                 }
                 else if (day.Value != null)
@@ -182,7 +188,8 @@ namespace MMAWebScrapeAlexaAzureFunction
                     {
                         Text = "Would you like to hear the most recent " + promotion.Value.ToString() + " results?"
                     };
-
+                    session.Attributes["getMostRecentPromotionEventPrompt"] = true;
+                    session.Attributes["promotionId"] = promotionId;
                     return BuildResponse(reprompt.OutputSpeech.ToString(), false, session, reprompt);
                 }
 
@@ -201,7 +208,7 @@ namespace MMAWebScrapeAlexaAzureFunction
             }
         }
 
-        public ObjectResult ParseResultsToSpeach(PromotionMeeting eventMeeting, ILogger logger, Session session, bool mainCardOnly)
+        public static ObjectResult ParseResultsToSpeach(PromotionMeeting eventMeeting, ILogger logger, Session session, bool mainCardOnly)
         {
             var response = "Here are the " + eventMeeting.Title + " results.";
 
@@ -254,10 +261,17 @@ namespace MMAWebScrapeAlexaAzureFunction
             }
         }
 
-        public static ObjectResult GetMostRecentPromotionEvent(int promotionId)
+        public static ObjectResult GetMostRecentPromotionEvent(ILogger log, int promotionId, Session session)
         {
-            throw new NotImplementedException();
-            // make call to method in MMA data serivce and retunr the results
+            //throw new NotImplementedException();
+            var promotionEvent = MMADataService.GetMostRecentPromotionEvent(promotionId, ref DbContext);
+            if(promotionEvent == null)
+            {
+                return BuildNotFoundErrorResponse(session, true);
+            } else
+            {
+                return ParseResultsToSpeach(promotionEvent, log, session, false);
+            }
         }
 
         public static ObjectResult GetPromotionEventByDay (string day, int promotionId)
@@ -383,8 +397,6 @@ namespace MMAWebScrapeAlexaAzureFunction
 
             return new OkObjectResult(skillResponse);
         }
-
         #endregion
-
     }
 }
