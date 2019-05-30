@@ -38,6 +38,14 @@ namespace MMAWebScrape.AzureFunction
                 .FirstOrDefault();
         }
 
+        public static IEnumerable<PromotionMeeting> GetEventsByDate(DateTime dateTime, ref MMADbContext context)
+        {
+            return context.PromotionMeetings.Where(i => i.Date == dateTime)
+                .Include(i => i.FightResults)
+                .Include(i => i.Promotion)
+                .ToList();
+        }
+
         public static void SaveChanges(ref MMADbContext context)
         {
             context.SaveChanges();
