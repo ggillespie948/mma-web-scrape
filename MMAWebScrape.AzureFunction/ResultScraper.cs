@@ -15,7 +15,8 @@ using MMAWebScrape.AzureFunction;
 namespace MMAWebScrape
 {
     /// <summary>
-    /// Collection of methods and data which scrape racing results from a given html document
+    /// Collection of methods and data which scrape mma results from a given html document
+    /// this method is likely to change with the source document being provided 
     /// </summary>
     public class ResultScraper
     {
@@ -67,7 +68,6 @@ namespace MMAWebScrape
                 DateTime promotionDate = ProcessTimeNode(EventDateNodes.ElementAt(counter));
                 promotionMeeting.Title = ProcessEventTitle(EventTitleNodes.ElementAt(counter), out int promotionId);
 
-
                 Console.WriteLine("Checking for existing promotion meeting..");
                 if (MMADataService.DoesPromotionMeetingExist(promotionDate, promotionId, ref DbContext))
                 {
@@ -102,24 +102,19 @@ namespace MMAWebScrape
 
                 //main card
                 Console.WriteLine("adding main card nodes..");
-                for (int i = 0; i < fightResultNodes.Count(); i += 2)
+                for (int i = 0; i < fightResultNodes.Count(); i ++)
                 {
-                    if(fightResultNodes.Count >= i)
-                    {
-                        mainCardNode.Add(fightResultNodes[i]);
-                    } 
-
+                    mainCardNode.Add(fightResultNodes[i].Descendants("div").ElementAt(0));
                 }
 
                 //under card
                 Console.WriteLine("adding under card nodes..");
-                for (int i=1; i< (fightResultNodes.Count()-1); i+=2)
+                for (int i = 0; i<fightResultNodes.Count(); i++)
                 {
-                    if (fightResultNodes.Count >= i)
-                    {
-                        underCardNode.Add(fightResultNodes[i]);
-                    } 
+                    underCardNode.Add(fightResultNodes[i].Descendants("div").ElementAt(1));
                 }
+
+                int fightNumber = 0;
 
                 if (mainCardNode.Count > counter)
                 {
@@ -127,7 +122,7 @@ namespace MMAWebScrape
                     foreach (var fightResultNode in mainCardNode[counter].Descendants("li"))
                     {
                         var fightResult = new FightResult();
-
+                        fightResult.FightNumber = fightNumber;
                         fightResult.PromotionMeeting = promotionMeeting;
                         fightResult.IsMainCard = true;
 
@@ -148,6 +143,8 @@ namespace MMAWebScrape
                         }
 
                         promotionMeeting.FightResults.Add(fightResult);
+
+                        fightNumber++;
                     
                     }
                 }
@@ -160,7 +157,7 @@ namespace MMAWebScrape
                     foreach (var fightResultNode in underCardNode[counter].Descendants("li"))
                     {
                         var fightResult = new FightResult();
-
+                        fightResult.FightNumber = fightNumber;
                         fightResult.PromotionMeeting = promotionMeeting;
                         fightResult.IsMainCard = false;
 
@@ -182,6 +179,8 @@ namespace MMAWebScrape
                         }
 
                         promotionMeeting.FightResults.Add(fightResult);
+
+                        fightNumber++;
                     }
                 }
 
@@ -229,6 +228,28 @@ namespace MMAWebScrape
         {
             decisionString = decisionString.Replace("def.", "defeated");
             decisionString = decisionString.Replace("def ", "defeated ");
+            decisionString = decisionString.Replace("sub ", "submission ");
+            decisionString = decisionString.Replace("sub.", "submission ");
+            decisionString = decisionString.Replace("R1 ", "Round 1 ");
+            decisionString = decisionString.Replace("R2 ", "Round 2 ");
+            decisionString = decisionString.Replace("R3 ", "Round 3 ");
+            decisionString = decisionString.Replace("R4 ", "Round 4 ");
+            decisionString = decisionString.Replace("R5 ", "Round 5 ");
+            decisionString = decisionString.Replace("R1,", "Round 1 ");
+            decisionString = decisionString.Replace("R2,", "Round 2 ");
+            decisionString = decisionString.Replace("R3,", "Round 3 ");
+            decisionString = decisionString.Replace("R4,", "Round 4 ");
+            decisionString = decisionString.Replace("R5,", "Round 5 ");
+
+            // Potentially add error checking in case the file doesn't have []
+            if (decisionString.Contains("(") && decisionString.Contains(")"))
+            {
+                int indexOfOpen = decisionString.IndexOf('(');
+                int indexOfClose = decisionString.IndexOf(')', indexOfOpen + 1);
+                decisionString = decisionString.Substring(0, indexOfOpen) + decisionString.Substring(indexOfClose + 1);
+
+            }
+
             return decisionString;
         }
 
