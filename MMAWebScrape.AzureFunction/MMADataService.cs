@@ -50,8 +50,6 @@ namespace MMAWebScrape.AzureFunction
         {
             return context.PromotionMeetings.Where(i => i.PromotionId == promotionId)
                 .Include(i => i.FightResults)
-                .Include(i => i.Promotion)
-                .OrderByDescending(i => i.Date)
                 .FirstOrDefault();
         }
 
