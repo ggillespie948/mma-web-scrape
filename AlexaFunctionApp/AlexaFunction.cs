@@ -22,8 +22,9 @@ using Alexa.NET.Security.Functions;
 using MMAWeb.Db;
 using MMAWebScrape.AzureFunction;
 using MMAWeb.Models.PromotionMeetings;
+using System.Linq;
 
-namespace MMAWebScrapeAlexaAzureFunction
+namespace MMAWeb.AzureFunction
 {
     public class AlexaFunction
     {
@@ -34,7 +35,7 @@ namespace MMAWebScrapeAlexaAzureFunction
         }
 
         [FunctionName("Alexa")]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
@@ -98,6 +99,16 @@ namespace MMAWebScrapeAlexaAzureFunction
             }
 
 
+
+            //check for single yes/no response
+            intentRequest.Intent.Slots.TryGetValue("yesNo", out var yesNo);
+            if(yesNo.Value != null)
+            {
+                return HandleYesNoIntent(intentRequest, session, log, yesNo.Value.ToString());
+            }
+
+
+
             //handle intent request
             switch (intentRequest.Intent.Name)
             {
@@ -105,10 +116,10 @@ namespace MMAWebScrapeAlexaAzureFunction
                     return HandleQuickResultsIntent(intentRequest, session, log);
 
                 case "Amazon.YesIntent":
-                    return HandleYesNoIntent(intentRequest, session, log);
+                    return HandleYesNoIntent(intentRequest, session, log, "yes");
 
                 case "Amazon.NoIntent":
-                    return HandleYesNoIntent(intentRequest, session, log);
+                    return HandleYesNoIntent(intentRequest, session, log, "no");
 
                 case "Amazon.StopIntent":
                     break;
@@ -126,12 +137,12 @@ namespace MMAWebScrapeAlexaAzureFunction
             return BuildErrorResponse(session, errorReprompt, true);
         }
 
-        public static ObjectResult HandleYesNoIntent(IntentRequest intentRequest, Session session, ILogger log)
+        public static ObjectResult HandleYesNoIntent(IntentRequest intentRequest, Session session, ILogger log, string yesNo)
         {
             if(session.Attributes["getMostRecentPromotionEventPrompt"] != null)
             {
-                // Set this session attribute to null so this yes/no intent is not 
-                // trigger during future yesNo in same session
+                // Set session attributes to null so this yes/no intent is not 
+                // triggered during future yesNo in same session
                 session.Attributes["isMostRecentPromotionEventPrompt"] = null;
 
                 if (session.Attributes["promotionId"] != null)
@@ -184,13 +195,18 @@ namespace MMAWebScrapeAlexaAzureFunction
                 else
                 {
                     var reprompt = new Reprompt();
+                    var speachStr = "Would you like to hear the most recent " + promotion.Value.ToString() + " results?";
                     reprompt.OutputSpeech = new PlainTextOutputSpeech
                     {
-                        Text = "Would you like to hear the most recent " + promotion.Value.ToString() + " results?"
+                        Text = speachStr
                     };
+
+                    if (session.Attributes == null)
+                        session.Attributes = new Dictionary<string, object>();
+
                     session.Attributes["getMostRecentPromotionEventPrompt"] = true;
                     session.Attributes["promotionId"] = promotionId;
-                    return BuildResponse(reprompt.OutputSpeech.ToString(), false, session, reprompt);
+                    return BuildResponse(speachStr, false, session, reprompt);
                 }
 
             }
@@ -210,26 +226,38 @@ namespace MMAWebScrapeAlexaAzureFunction
 
         public static ObjectResult ParseResultsToSpeach(PromotionMeeting eventMeeting, ILogger logger, Session session, bool mainCardOnly)
         {
-            var response = "Here are the " + eventMeeting.Title + " results.";
+            var response = "Here are the " + eventMeeting.Title + " results.  ";
+
+            eventMeeting.FightResults = eventMeeting.FightResults.OrderBy(i => i.FightNumber).ToList();
 
             if(mainCardOnly)
             {
+                response += " In the main card, ";
+
                 foreach(var result in eventMeeting.FightResults.Where(i=>i.IsMainCard))
                 {
-                    response += "" + result.DecisionSummary + ".";
+                    response += "" + result.DecisionSummary + ". ";
                 }
 
             } else
             {
-                foreach (var result in eventMeeting.FightResults)
+                response += " In the main card, ";
+                foreach (var result in eventMeeting.FightResults.Where(i=>i.IsMainCard))
                 {
-                    response += "" + result.DecisionSummary + ".";
+                    response += "" + result.DecisionSummary + ". ";
+                }
+
+                response += " In the under card, ";
+                foreach (var result in eventMeeting.FightResults.Where(i => !i.IsMainCard))
+                {
+                    response += "" + result.DecisionSummary + ". ";
                 }
             }
 
+            response += ". End of results.";
+
             return BuildResponse(response);
         }
-
 
         #region MMADataServiceCalls
 
@@ -243,7 +271,7 @@ namespace MMAWebScrapeAlexaAzureFunction
             } else
             {
                 //Process Event Results
-                throw new NotImplementedException();
+                return ParseResultsToSpeach(promotionEvent, logger, session, false);
             }
         }
 
@@ -256,7 +284,7 @@ namespace MMAWebScrapeAlexaAzureFunction
 
             } else
             {
-                //process the list of event results
+                //process the list of event results - prompt the user wiht options and read the one they ask
                 throw new NotImplementedException();
             }
         }
