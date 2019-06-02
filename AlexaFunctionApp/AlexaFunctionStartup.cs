@@ -5,10 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-
-[assembly: FunctionsStartup(typeof(RacingWeb.AlexaAzureFunction.AlexaFunctionStartup))]
-namespace RacingWeb.AlexaAzureFunction
-{
+[assembly: FunctionsStartup(typeof(RacingWeb.WebScrapeAzureFunction.AlexaFunctionStartup))]
+namespace RacingWeb.WebScrapeAzureFunction
+{ 
     public class AlexaFunctionStartup : FunctionsStartup
     {
         public override void Configure(IFunctionsHostBuilder builder)
