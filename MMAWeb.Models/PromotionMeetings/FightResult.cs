@@ -10,6 +10,7 @@ namespace MMAWeb.Models.PromotionMeetings
     {
         [Key]
         public int Id { get; set; }
+        public int FightNumber { get; set; }
         public int PromotionMeetingId { get; set; }
         public virtual PromotionMeeting PromotionMeeting { get; set; }
         public bool IsMainCard { get; set; }
